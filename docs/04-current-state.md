@@ -10,6 +10,8 @@ Inalpha 是 AI agent 编排与多 Python kernel 的量化实验框架。D-12 因
 下单必须经过 `trade.create_plan → trade.approve_plan → trade.execute_plan` 与机器风控。演化研究不会自动 promote、启动 Runner 或下单。
 架构与模块职责见 [架构总图](01-architecture-overview.md) / [内核设计](03-kernel-design.md)。
 
+最新界面发布：PR #223 已合入 main，Dashboard 已单独更新为 `12ac65d5` 并健康运行；其余九容器未变，服务器登录页 HTTP 200。回滚版本为 `7be04661`。准备页复用既有页面标题、面板、按钮和主题样式；上线后视觉验收待补，不代表 E2 已通过。见 [部署回执](validation/evolution-preparation-style-deployment-2026-10-10.json)。下文 PR #219 是此前三服务发布证据。
+
 ## 已验证到哪里
 
 | 环节 | 证据 | 当前边界 |
