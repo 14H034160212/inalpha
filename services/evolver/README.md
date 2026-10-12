@@ -230,3 +230,18 @@ Dashboard 的准备页通过普通 owner 身份调用 orchestration `/evolution/
 `/evolution/approval` 通过既有 hooks 创建冻结费用审批。E2 Loop 现在与 E1 一样，正常用户明确批准后才直接提交；独立 campaign API 保持既有授权语义。准备页不通过聊天申请审批，故不产生准备聊天费用。审批包含完整配置、事件快照、种子与行情摘要、冻结模型和硬预算，修改需要重新准备。执行仍经 owner/JWT、orchestration Ed25519 grant 与 Dashboard 模型兑换；不新增明文凭据持久化。
 
 部署需先完成 `0067`（依赖 `0066`）迁移，再同步 Dashboard、orchestration、Evolver。已有 Loop 批准记录时降级迁移会拒绝，不自动删除命令。批准命令沿用原 AES-GCM 与最长 24 小时恢复窗口，`JWT_SECRET` 轮换旧密文限制不变。所有生产状态和剩余验收统一见 [当前状态](../../docs/04-current-state.md#未完成--下一步)。
+
+### 隔离完整应用进程检查
+
+```bash
+# 仅接受本地 PostgreSQL；创建新审计库并保留，不读取或删除旧 audit 库。
+DATABASE_URL="<local-postgresql-url>" .venv/bin/python scripts/validate_process_recovery.py
+```
+
+该检查启动未修改的完整 Evolver 应用并两次重启，验证合成独立 E1 中断记录的收口和费用保留。未创建有效 owner/grant，不调用模型；不能代替 E2 授权命令恢复、在途模型请求、Forward/holdout 或生产重启验收。
+
+此脚本需要 POSIX 信号（Linux/macOS），拒绝 Python 优化模式；失败时保留异常类型与结构化回执，不写原始异常正文。
+
+审计库按本任务授权保留，每次运行均创建一个新的完整 schema；脚本输出库名与回执路径。请控制手动运行次数，存储回收需另行明确授权，脚本不自动删除审计证据。
+
+隔离 checkout 必须没有根、Evolver 工作目录或 infra 的 `.env` 文件；请通过环境变量传入本地 DATABASE_URL。配置的下游端点使用拒绝请求的本地接收器，计数不等于全部出站网络审计。SIGTERM 退出码单独记录，不据此宣称退出码 0 的优雅停机验收。
