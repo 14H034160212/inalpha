@@ -14,18 +14,23 @@ afterEach(() => {
   replace.mockReset();
 });
 
-it("preserves the experiment target, repeated query values and anchor on locale change", () => {
+it.each([
+  ["?targetKind=paper_runner&targetId=fixture-id&tag=a&tag=b", "#coverage"],
+  ["?targetKind=paper_runner&targetId=fixture-id", ""],
+  ["", "#coverage"],
+  ["", ""],
+])("preserves query %s and fragment %s in the navigation callback", (search, hash) => {
   vi.stubGlobal("React", React);
   vi.stubGlobal("window", {
     location: {
-      search: "?targetKind=paper_runner&targetId=fixture-id&tag=a&tag=b",
-      hash: "#coverage",
+      search,
+      hash,
     },
   });
   const buttons = LocaleSwitcher().props.children;
-  buttons[0].props.onClick();
+  buttons.find((button: React.ReactElement<{ children: string; onClick: () => void }>) => button.props.children === "EN").props.onClick();
   expect(replace).toHaveBeenCalledWith(
-    "/evolution/prepare?targetKind=paper_runner&targetId=fixture-id&tag=a&tag=b#coverage",
+    `/evolution/prepare${search}${hash}`,
     { locale: "en" },
   );
 });
