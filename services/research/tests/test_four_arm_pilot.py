@@ -320,3 +320,16 @@ async def test_baseline_final_retries_invalid_output(tmp_path):
     assert baseline["status"] == "completed"
     assert len(baseline["calls"]) == 2
     assert [c["attempt"] for c in baseline["calls"]] == [0, 1]
+
+
+def test_neutral_conclusion_flip_is_explicitly_skipped():
+    neutral = {**decision(), "action": 0}
+    run = {
+        "status": "completed",
+        "decision": neutral,
+        "history": [{"role": "risk", "round": 1, "output": neutral}],
+    }
+    plans = intervention_plans(run, materials()["development"][0])
+    flip = next(plan for plan in plans if plan["name"] == "flip_conclusion")
+    assert flip["skip"] == "NEUTRAL_CONCLUSION_HAS_NO_DIRECTIONAL_REVERSE"
+    assert "prefix" not in flip

@@ -34,7 +34,7 @@ def intervention_plans(run: dict[str, Any], case: dict[str, Any]) -> list[dict[s
     flipped = copy.deepcopy(prefix)
     decision = flipped[-1]["output"]
     decision["p_up"], decision["p_down"] = decision["p_down"], decision["p_up"]
-    decision["action"] = -decision["action"] if decision["action"] else 1
+    decision["action"] = -decision["action"]
     decision["rationale"] = "Intervention: the analyst's stated conclusion is reversed."
     placebo = copy.deepcopy(prefix)
     length = len(safe_json(row["output"]))
@@ -52,7 +52,9 @@ def intervention_plans(run: dict[str, Any], case: dict[str, Any]) -> list[dict[s
             "prefix": placebo,
             "matching": "approximate character length, not exact provider tokens",
         },
-        {"name": "flip_conclusion", "prefix": flipped},
+        {"name": "flip_conclusion", "prefix": flipped}
+        if row["output"]["action"] != 0
+        else {"name": "flip_conclusion", "skip": "NEUTRAL_CONCLUSION_HAS_NO_DIRECTIONAL_REVERSE"},
         {"name": "downstream_noise", "prefix": prefix, "stochastic_replicate": True},
     ]
     cited = run["decision"]["cited_evidence_ids"]

@@ -88,6 +88,8 @@ Interventions modify the closest-probability analyst in the last completed round
 turn-order tie-break), preserve the earlier prefix and replay all later turns. Contribution
 removal has an unrelated character-length replacement control. Conclusion flipping is an
 explicit edited message; it does not ask the model to cooperate with an instruction to flip.
+If the selected contribution is neutral, conclusion flipping is explicitly skipped because
+there is no directional reverse; the runner does not inject an arbitrary long stance.
 Evidence removal drops the first cited evidence block and replays from round zero, with
 an uncited similar-length placebo where available. Missing controls receive explicit skip
 reasons. Fresh stochastic noise reruns use the same replay boundaries; no unsupported
