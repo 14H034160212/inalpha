@@ -10,7 +10,8 @@
   "limit_usd": "5",
   "baseline_tokens": 4000,
   "arm_tokens": 24000,
-  "units": 2,
+  "samples": 2,
+  "revisions": 2,
   "rounds": 2,
   "pricing": {
     "currency": "USD",

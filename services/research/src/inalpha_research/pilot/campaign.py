@@ -77,7 +77,15 @@ async def campaign(
             int(configuration["baseline_tokens"] if arm == "A" else configuration["arm_tokens"]),
         )
         result = await run_arm(
-            runner, arm, units=configuration["units"], rounds=configuration["rounds"], replay=replay
+            runner,
+            arm,
+            units=int(
+                configuration.get(
+                    "samples" if arm == "B" else "revisions", configuration.get("units", 2)
+                )
+            ),
+            rounds=configuration["rounds"],
+            replay=replay,
         )
         result["artifact_validation"] = validate_run(artifacts.path)
         return result
