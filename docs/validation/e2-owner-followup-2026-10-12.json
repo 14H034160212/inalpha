@@ -24,7 +24,9 @@
     "Necessary coverage remains insufficient.",
     "No matched-control or FDR evaluation.",
     "No paid search, champion, Forward or holdout acceptance.",
-    "UI observation is not bound to an independently sampled image SHA."
+    "UI observation is not bound to an independently sampled image SHA.",
+    "Last bar timestamps and distance to cutoff were not sampled; bar counts are UI observations, not freshness or continuity acceptance.",
+    "Locale regression test exercises the mocked navigation callback, not React DOM events or the real next-intl router."
   ],
   "isolated_regressions": {
     "database": "inalpha_e2_acceptance_e11a381e0cba4e329608a73a8f2c21d4",
