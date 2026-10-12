@@ -239,3 +239,5 @@ DATABASE_URL="<local-postgresql-url>" .venv/bin/python scripts/validate_process_
 ```
 
 该检查启动未修改的完整 Evolver 应用并两次重启，验证合成独立 E1 中断记录的收口和费用保留。未创建有效 owner/grant，不调用模型；不能代替 E2 授权命令恢复、在途模型请求、Forward/holdout 或生产重启验收。
+
+此脚本需要 POSIX 信号（Linux/macOS），拒绝 Python 优化模式；失败时保留异常类型与结构化回执，不写原始异常正文。
