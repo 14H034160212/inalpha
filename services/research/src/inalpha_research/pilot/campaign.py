@@ -69,6 +69,7 @@ async def campaign(
         )
         if replay:
             artifacts.links["replay_id"] = artifacts.run_id
+            artifacts.links["base_run_id"] = replay["base_run_id"]
         runner = AttemptRunner(
             artifacts,
             recorder_for(artifacts, store, owner, pricing),
@@ -99,7 +100,7 @@ async def campaign(
             if "skip" in plan:
                 replays.append({"case_id": case["case_id"], **plan})
                 continue
-            replay = await execute(case, "D", plan)
+            replay = await execute(case, "D", {**plan, "base_run_id": base["run_id"]})
             if plan.get("remove_evidence"):
                 removed = next(e for e in case["evidence"] if e["id"] == plan["remove_evidence"])
                 text = safe_json([c.get("output") for c in replay["calls"]]).decode()

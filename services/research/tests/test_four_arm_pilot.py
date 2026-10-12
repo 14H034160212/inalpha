@@ -151,6 +151,9 @@ async def test_complete_four_arm_campaign_and_replays(tmp_path):
     assert len(result["runs"]) == 4
     assert all(r["status"] == "completed" and not r["artifact_validation"] for r in result["runs"])
     d = result["runs"][-1]
+    assert all(
+        r["replay"]["base_run_id"] == d["run_id"] for r in result["replays"] if "skip" not in r
+    )
     assert d["completed_units"] == 6
     assert len(store.starts) == len(store.ends)
     assert all(
@@ -293,3 +296,4 @@ def test_report_rejects_invalid_labels(patch):
 def test_report_rejects_empty_labels():
     with pytest.raises(ValueError, match="nonempty"):
         build_report([], [], [])
+
