@@ -256,3 +256,30 @@ def test_campaign_cap_and_report_pairing():
         budget.reserve(1000, 1000)
     with pytest.raises(ValueError, match="exactly one"):
         build_report([], materials()["labels"], [])
+
+
+def test_report_rejects_duplicate_labels():
+    label = materials()["labels"][0]
+    with pytest.raises(ValueError, match="unique outcome"):
+        build_report([], [label, label], [])
+
+
+@pytest.mark.parametrize(
+    "patch",
+    [
+        {"value": "UNKNOWN"},
+        {"excess_return": float("nan")},
+        {"excess_return": float("inf")},
+        {"excess_return": True},
+        {"case_id": ""},
+    ],
+)
+def test_report_rejects_invalid_labels(patch):
+    label = {**materials()["labels"][0], **patch}
+    with pytest.raises(ValueError, match="invalid outcome"):
+        build_report([], [label], [])
+
+
+def test_report_rejects_empty_labels():
+    with pytest.raises(ValueError, match="nonempty"):
+        build_report([], [], [])

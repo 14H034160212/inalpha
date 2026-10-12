@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import math
 import random
 import statistics
 from typing import Any
@@ -129,7 +130,22 @@ def build_report(
     runs: list[dict[str, Any]], labels: list[dict[str, Any]], replays: list[dict[str, Any]]
 ) -> dict[str, Any]:
     """Require paired four-arm coverage; never silently drop missing or invalid cases."""
+    if not labels:
+        raise ValueError("nonempty outcome labels required")
+    for label in labels:
+        excess = label.get("excess_return")
+        if (
+            not isinstance(label.get("case_id"), str)
+            or not label["case_id"]
+            or label.get("value") not in ("UP", "FLAT", "DOWN")
+            or isinstance(excess, bool)
+            or not isinstance(excess, (int, float))
+            or not math.isfinite(excess)
+        ):
+            raise ValueError("invalid outcome label")
     by_case = {label["case_id"]: label for label in labels}
+    if len(by_case) != len(labels):
+        raise ValueError("unique outcome case IDs required")
     lookup = {(r["case_id"], r["arm"]): r for r in runs}
     if len(lookup) != len(runs) or set(lookup) != {
         (case, arm) for case in by_case for arm in "ABCD"
