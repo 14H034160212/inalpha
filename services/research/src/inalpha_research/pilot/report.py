@@ -206,6 +206,9 @@ def build_report(
     for row in intervention_rows:
         if "flip" not in row:
             continue
+        if row["name"] in ("downstream_noise", "round_zero_noise"):
+            row["noise_adjusted_flip"] = None
+            continue
         baseline_name = (
             "round_zero_noise"
             if row["name"] in ("remove_evidence", "remove_placebo_evidence")

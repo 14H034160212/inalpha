@@ -161,6 +161,16 @@ async def test_complete_four_arm_campaign_and_replays(tmp_path):
     )
     report = build_report(result["runs"], data["labels"][:1], result["replays"])
     assert report["complete_case_count"] == 1
+    for replay in result["replays"]:
+        if replay.get("replay", {}).get("name") == "round_zero_noise":
+            replay["decision"]["action"] = -d["decision"]["action"]
+    adjusted = build_report(result["runs"], data["labels"][:1], result["replays"])
+    rows = {row["name"]: row for row in adjusted["interventions"]}
+    assert rows["round_zero_noise"]["flip"] == 1
+    assert rows["round_zero_noise"]["noise_adjusted_flip"] is None
+    assert rows["downstream_noise"]["noise_adjusted_flip"] is None
+    assert rows["remove_evidence"]["noise_adjusted_flip"] == -1
+    assert rows["delete_contribution"]["noise_adjusted_flip"] == 0
     assert {r["name"] for r in report["interventions"]} >= {
         "flip_conclusion",
         "delete_contribution",
