@@ -259,7 +259,7 @@ async def run_arm(
                 else "aggregate completed units into final decision",
             },
             runner.token_limit,
-            final=arm != "A",
+            final=True,
         )
     except (BudgetStop, ValueError) as exc:
         terminal, reason = "invalid", str(exc)

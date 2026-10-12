@@ -297,3 +297,26 @@ def test_report_rejects_empty_labels():
     with pytest.raises(ValueError, match="nonempty"):
         build_report([], [], [])
 
+
+async def test_baseline_final_retries_invalid_output(tmp_path):
+    data = materials()
+    calls = 0
+
+    async def invoke(**kwargs):
+        nonlocal calls
+        calls += 1
+        return response({"invalid": True} if calls == 1 else decision())
+
+    result = await campaign(
+        {"protocol": data["protocol"], "cases": data["development"][:1]},
+        tmp_path / "baseline-retry",
+        CONFIG,
+        Store(),
+        "test:owner",
+        invoke,
+        intervention_cases=0,
+    )
+    baseline = result["runs"][0]
+    assert baseline["status"] == "completed"
+    assert len(baseline["calls"]) == 2
+    assert [c["attempt"] for c in baseline["calls"]] == [0, 1]
