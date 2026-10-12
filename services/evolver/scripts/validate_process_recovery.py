@@ -26,7 +26,6 @@ from urllib.request import urlopen
 from uuid import uuid4
 
 import psycopg
-from dotenv import dotenv_values
 from psycopg import sql
 from psycopg.rows import dict_row
 from validate_durable_loop import ROOT, local_database_urls
@@ -167,9 +166,13 @@ def main() -> int:
     """Create a fresh migration-chain database and restart the unmodified application."""
     if sys.flags.optimize:
         raise RuntimeError("process acceptance refuses optimized Python; assertions must run")
-    source = os.environ.get("DATABASE_URL") or dotenv_values(ROOT / ".env").get("DATABASE_URL")
+    if os.name != "posix":
+        raise RuntimeError("process acceptance requires POSIX signals before any DB side effects")
+    source = os.environ.get("DATABASE_URL")
     if not source:
-        raise ValueError("local DATABASE_URL required")
+        raise ValueError(
+            "local DATABASE_URL must be supplied through the environment; dotenv files must be absent"
+        )
     database = f"inalpha_process_audit_{uuid4().hex}"
     admin_url, test_url = local_database_urls(source, database)
     raw_url = test_url.replace("postgresql+psycopg://", "postgresql://")
