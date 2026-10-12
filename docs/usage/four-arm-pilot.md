@@ -101,3 +101,29 @@ and noise-adjusted flip differences. Character matching is not exact tokenizer m
 formal intervention controls and blinded human process scoring still need protocol review.
 
 A 10-case run validates the machinery. Retain negative/inconclusive results and limitations.
+
+## Real-provider development acceptance (2026-10-12)
+
+Under an explicitly approved total $5 limit, DeepSeek completed a one-case calibration
+(14 calls) and the ten-case four-arm campaign (296 calls, including replays). All 40 base
+runs and six replay runs completed; the uncited-evidence placebo was explicitly skipped
+because the selected base decision cited every evidence block. All artifact validators
+passed and all 296 main call IDs matched the unified ledger, with zero pending/unknown
+usage. Total estimated cost including calibration was $0.1601403, not an invoice total.
+
+Calibrated settings were 11 B samples, 6 C revisions and 2 D rounds. Observed median
+input-plus-output tokens were A=593, B=9348, C=9383, D=9324. B/C/D match within 10%
+of their mean; 24000 remains a guard cap, not an achieved preregistered token target.
+Calibration reused the first development case; no held-out or formal evaluation is claimed.
+
+Brier means were A=.81066, B=.77360, C=.68910, D=.72692. These ten overlapping
+development cases do not demonstrate multi-agent superiority. All six replays retained
+the same action. Evidence-removal outputs misattributed benchmark returns to the asset;
+this factual error remains in the results. The literal re-entry ID scan also matched
+`returns` within `benchmark_returns`, so its flag is a heuristic requiring inspection,
+not proof that removed input leaked. Exact numeric scanning cannot rule out reconstruction.
+
+The receipt is `docs/validation/research-pilot-readiness-2026-10-12.json`. Independent
+review found a report-label validation gap, now fixed with duplicate/invalid/empty-label
+regressions. Exact tokenizer controls, blinded human process review, and formal protocol
+and disjoint sample freeze remain open.
