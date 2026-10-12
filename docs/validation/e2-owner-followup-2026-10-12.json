@@ -35,6 +35,33 @@
     "failed": 2,
     "failures": "Both five-generation cases reached their existing 240-second timeout; root cause not established.",
     "scope": "Synthetic database/runtime integration tests, not complete-service recovery or production research acceptance",
-    "audit_database_retained": true
+    "audit_database_retained": true,
+    "first_run_reproduction": {
+      "passed": true,
+      "duration_seconds": 185.02,
+      "deadline_seconds": 240,
+      "production_code_changed": false,
+      "scope": "single first-run five-generation integration case, offline model, real evaluation engine",
+      "assertions": [
+        "generation 5 completed",
+        "40 hypotheses and 120 succeeded implementations",
+        "insufficient_evidence with no champion, Forward or holdout"
+      ],
+      "root_cause": "Resource contention is a hypothesis, not established. Original two timeout failures retained."
+    },
+    "checkpoint_resume_reproduction": {
+      "passed": true,
+      "duration_seconds": 217.45,
+      "deadline_seconds": 240,
+      "production_code_changed": false,
+      "offline_mutation_calls": 8,
+      "first_run_offline_mutation_calls": 10,
+      "scope": "persisted proposal replay within integration test, not process restart or real paid-provider replay",
+      "assertions": [
+        "generation 5 completed",
+        "40 hypotheses and 120 succeeded implementations",
+        "insufficient_evidence; no champion, Forward or holdout"
+      ]
+    }
   }
 }
