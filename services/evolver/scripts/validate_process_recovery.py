@@ -175,16 +175,28 @@ def main() -> int:
         "actual_model_calls": 0,
     }
     with record_receipt(logs, report):
+        report["checkout_head"] = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip()
+        report["runtime_source_tree"] = subprocess.check_output(
+            ["git", "rev-parse", "HEAD:services/evolver/src"], cwd=ROOT, text=True
+        ).strip()
+        if (
+            subprocess.run(
+                ["git", "diff", "--quiet", "HEAD", "--", "services/evolver/src"], cwd=ROOT
+            ).returncode
+            != 0
+        ):
+            raise RuntimeError("runtime source is modified; provenance cannot be established")
+        report["runtime_source_clean"] = True
         with psycopg.connect(admin_url, autocommit=True) as admin:
             admin.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(database)))
         report["audit_database_retained"] = True
+        # Only operating-system settings are inherited; credentials and app configuration are not.
         env = {
-            key: value
-            for key, value in os.environ.items()
-            if not any(
-                part in key.upper()
-                for part in ("TOKEN", "SECRET", "API_KEY", "DATABASE_URL", "GRANT")
-            )
+            key: os.environ[key]
+            for key in ("PATH", "LANG", "LC_ALL", "TMPDIR", "SYSTEMROOT")
+            if key in os.environ
         }
         env.update(
             DATABASE_URL=test_url,
@@ -224,6 +236,7 @@ def main() -> int:
         ):
             env[key] = f"http://127.0.0.1:{sink.server_port}"
         process = None
+        stopped = False
         try:
             with (logs / "application.log").open("w") as output:
 
@@ -251,11 +264,13 @@ def main() -> int:
                 healthy(process, port)
                 # Freeze the owned process before injecting the orphan record: no fixture can dispatch.
                 process.send_signal(signal.SIGSTOP)
+                stopped = True
                 run_id = asyncio.run(seed_interrupted(raw_url))
                 before = observe(raw_url, run_id)
                 assert before["run"]["status"] == "running"
                 process.kill()
                 process.wait(timeout=10)
+                stopped = False
                 report["forced_exit_code"] = process.returncode
                 process, port = launch()
                 healthy(process, port)
@@ -285,7 +300,10 @@ def main() -> int:
                 )
         finally:
             if process is not None and process.poll() is None:
-                process.terminate()
+                if stopped:
+                    process.kill()
+                else:
+                    process.terminate()
                 try:
                     process.wait(timeout=15)
                 except subprocess.TimeoutExpired:
@@ -294,7 +312,15 @@ def main() -> int:
             report["downstream_requests"] = RejectExternalCalls.calls
             sink.shutdown()
             sink.server_close()
-        print(json.dumps({"result": report["result"], "receipt": str(logs / "receipt.json")}))
+        print(
+            json.dumps(
+                {
+                    "result": report["result"],
+                    "database": database,
+                    "receipt": str(logs / "receipt.json"),
+                }
+            )
+        )
         return 0
 
 
