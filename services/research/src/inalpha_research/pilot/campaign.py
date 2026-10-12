@@ -107,9 +107,13 @@ async def campaign(
                     str(v) for v in removed["content"].values() if isinstance(v, (int, float))
                 ]
                 replay["reentry"] = {
-                    "evidence_id": removed["id"] in text,
-                    "numeric_values": any(number in text for number in numbers),
-                    "method": "literal ID/numeric scan; inferred or rounded reconstruction may escape detection",
+                    "exact_cited_evidence_id": any(
+                        removed["id"] in (c.get("output") or {}).get("cited_evidence_ids", [])
+                        for c in replay["calls"]
+                    ),
+                    "text_id_substring_match": removed["id"] in text,
+                    "numeric_literal_substring_match": any(number in text for number in numbers),
+                    "method": "exact citation plus substring heuristics; substring matches may be false positives, and inferred or rounded reconstruction may escape detection",
                 }
             replays.append(replay)
     result = {
