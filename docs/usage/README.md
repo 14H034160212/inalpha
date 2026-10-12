@@ -63,6 +63,12 @@ Coverage:
 | Event extractor | No LLM call: deterministic rules | No token row is appropriate |
 | Developer scripts (including `scripts/deepseek_review.py`) and standalone evaluation utilities | Outside authenticated application runtime | Not automatically billable owner records; explicitly wire a recorder if used for a paid pilot |
 
+## Four-arm development execution
+
+See [the #206 development pilot guide](four-arm-pilot.md) for aligned TSLA/SPY acquisition,
+frozen inputs, four-arm execution, budget guards, intervention replay and paired reports.
+These commands reuse this ledger and require explicit authorization before paid calls.
+
 ## Pilot preparation
 
 From `services/research`:
