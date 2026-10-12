@@ -181,22 +181,30 @@ def main() -> int:
         "e2_authorized_baseline_recovery": "not tested",
         "production_recovery": "not tested",
         "fixture_known_cost_usd": "0.0123",
-        "actual_model_calls": 0,
+        "provider_credentials": "none; unusable fixture only",
     }
     with record_receipt(logs, report):
         report["checkout_head"] = subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
         ).strip()
-        report["runtime_source_tree"] = subprocess.check_output(
-            ["git", "rev-parse", "HEAD:services/evolver/src"], cwd=ROOT, text=True
-        ).strip()
-        if (
-            subprocess.run(
-                ["git", "diff", "--quiet", "HEAD", "--", "services/evolver/src"], cwd=ROOT
-            ).returncode
-            != 0
-        ):
-            raise RuntimeError("runtime source is modified; provenance cannot be established")
+        runtime_paths = ("services/evolver/src", "services/paper/src", "services/_shared")
+        report["runtime_source_trees"] = {}
+        for path in runtime_paths:
+            report["runtime_source_trees"][path] = subprocess.check_output(
+                ["git", "rev-parse", f"HEAD:{path}"], cwd=ROOT, text=True
+            ).strip()
+            status = subprocess.check_output(
+                ["git", "status", "--porcelain", "--untracked-files=all", "--", path],
+                cwd=ROOT,
+                text=True,
+            )
+            if status.strip():
+                raise RuntimeError("runtime source has tracked or untracked changes")
+        # Settings may consult checkout/cwd dotenv files; refuse these instead of modifying settings.
+        for path in (ROOT / ".env", ROOT / "services/evolver/.env", ROOT / "infra/.env"):
+            if path.exists():
+                raise RuntimeError("isolated validation requires a checkout without dotenv files")
+        report["dotenv_files_absent"] = True
         report["runtime_source_clean"] = True
         with psycopg.connect(admin_url, autocommit=True) as admin:
             admin.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(database)))
@@ -295,7 +303,7 @@ def main() -> int:
                 assert recovered["slots"][1]["error_code"] == "EVOLUTION_SERVICE_RESTARTED"
                 process.terminate()
                 process.wait(timeout=15)
-                report["graceful_exit_code"] = process.returncode
+                report["sigterm_exit_code"] = process.returncode
                 process, port = launch()
                 healthy(process, port)
                 assert observe(raw_url, run_id) == recovered
@@ -303,7 +311,7 @@ def main() -> int:
                 report.update(
                     result="passed",
                     restart_count=2,
-                    downstream_requests=0,
+                    configured_downstream_requests=0,
                     recovered=recovered,
                     audit_database_retained=True,
                 )
@@ -318,7 +326,7 @@ def main() -> int:
                 except subprocess.TimeoutExpired:
                     process.kill()
                     process.wait(timeout=5)
-            report["downstream_requests"] = RejectExternalCalls.calls
+            report["configured_downstream_requests"] = RejectExternalCalls.calls
             sink.shutdown()
             sink.server_close()
         print(
