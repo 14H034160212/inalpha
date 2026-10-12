@@ -17,9 +17,11 @@ import subprocess
 import sys
 import threading
 import time
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from decimal import Decimal
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from urllib.request import urlopen
 from uuid import uuid4
 
@@ -138,8 +140,24 @@ def observe(database_url: str, run_id: str) -> dict:
     return {"run": dict(run), "slots": [dict(row) for row in slots], "loops": loops}
 
 
+@contextmanager
+def record_receipt(logs: Path, report: dict):
+    """Preserve failed or partial audit evidence without storing raw exceptions."""
+    report["result"] = "failed"
+    try:
+        yield
+    except BaseException as exc:
+        report["result"] = "failed"
+        report["error_type"] = type(exc).__name__
+        raise
+    finally:
+        (logs / "receipt.json").write_text(json.dumps(report, indent=2, default=str) + "\n")
+
+
 def main() -> int:
     """Create a fresh migration-chain database and restart the unmodified application."""
+    if sys.flags.optimize:
+        raise RuntimeError("process acceptance refuses optimized Python; assertions must run")
     source = os.environ.get("DATABASE_URL") or dotenv_values(ROOT / ".env").get("DATABASE_URL")
     if not source:
         raise ValueError("local DATABASE_URL required")
@@ -156,119 +174,128 @@ def main() -> int:
         "fixture_known_cost_usd": "0.0123",
         "actual_model_calls": 0,
     }
-    with psycopg.connect(admin_url, autocommit=True) as admin:
-        admin.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(database)))
-    env = {
-        key: value
-        for key, value in os.environ.items()
-        if not any(
-            part in key.upper() for part in ("TOKEN", "SECRET", "API_KEY", "DATABASE_URL", "GRANT")
-        )
-    }
-    env.update(
-        DATABASE_URL=test_url,
-        EVENT_EVOLUTION_ENABLED="true",
-        WEB_CONCURRENCY="1",
-        JWT_SECRET="isolated-process-fixture-only",
-        EVOLUTION_CREDENTIAL_PUBLIC_KEY_B64="",
-    )
-    with (logs / "migrations.log").open("w") as output:
-        subprocess.run(
-            [str(ROOT / "infra/migrations/.venv/bin/python"), "-m", "alembic", "upgrade", "head"],
-            cwd=ROOT / "infra/migrations",
-            env=env,
-            stdout=output,
-            stderr=subprocess.STDOUT,
-            timeout=120,
-            check=True,
-        )
-    with psycopg.connect(raw_url) as conn:
-        report["schema"] = conn.execute("SELECT version_num FROM alembic_version").fetchone()[0]
-    if report["schema"] != "0067":
-        raise RuntimeError("unexpected migration head; audit assumptions require review")
-    sink = ThreadingHTTPServer(("127.0.0.1", 0), RejectExternalCalls)
-    threading.Thread(target=sink.serve_forever, daemon=True).start()
-    for key in (
-        "DATA_SERVICE_URL",
-        "PAPER_SERVICE_URL",
-        "DASHBOARD_SERVICE_URL",
-        "ORCHESTRATION_SERVICE_URL",
-        "LLM_BASE_URL",
-    ):
-        env[key] = f"http://127.0.0.1:{sink.server_port}"
-    process = None
-    try:
-        with (logs / "application.log").open("w") as output:
-
-            def launch() -> tuple[subprocess.Popen, int]:
-                port = free_port()
-                child = subprocess.Popen(
-                    [
-                        sys.executable,
-                        "-m",
-                        "uvicorn",
-                        "inalpha_evolver.main:app",
-                        "--host",
-                        "127.0.0.1",
-                        "--port",
-                        str(port),
-                    ],
-                    cwd=ROOT / "services/evolver",
-                    env=env,
-                    stdout=output,
-                    stderr=subprocess.STDOUT,
-                )
-                return child, port
-
-            process, port = launch()
-            healthy(process, port)
-            # Freeze the owned process before injecting the orphan record: no fixture can dispatch.
-            process.send_signal(signal.SIGSTOP)
-            run_id = asyncio.run(seed_interrupted(raw_url))
-            before = observe(raw_url, run_id)
-            assert before["run"]["status"] == "running"
-            process.kill()
-            process.wait(timeout=10)
-            report["forced_exit_code"] = process.returncode
-            process, port = launch()
-            healthy(process, port)
-            recovered = observe(raw_url, run_id)
-            assert recovered["run"] == {
-                "status": "aborted",
-                "failure_code": "EVOLUTION_SERVICE_RESTARTED",
-            }
-            assert recovered["slots"][0]["outcome"] == "no_change"
-            assert recovered["slots"][0]["llm_cost_usd"] == Decimal("0.0123")
-            assert recovered["slots"][1]["outcome"] == "cancelled"
-            assert recovered["slots"][1]["usage_status"] == "unknown"
-            assert recovered["slots"][1]["error_code"] == "EVOLUTION_SERVICE_RESTARTED"
-            process.terminate()
-            process.wait(timeout=15)
-            report["graceful_exit_code"] = process.returncode
-            process, port = launch()
-            healthy(process, port)
-            assert observe(raw_url, run_id) == recovered
-            assert RejectExternalCalls.calls == 0
-            report.update(
-                result="passed",
-                restart_count=2,
-                downstream_requests=0,
-                recovered=recovered,
-                audit_database_retained=True,
+    with record_receipt(logs, report):
+        with psycopg.connect(admin_url, autocommit=True) as admin:
+            admin.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(database)))
+        report["audit_database_retained"] = True
+        env = {
+            key: value
+            for key, value in os.environ.items()
+            if not any(
+                part in key.upper()
+                for part in ("TOKEN", "SECRET", "API_KEY", "DATABASE_URL", "GRANT")
             )
-    finally:
-        if process is not None and process.poll() is None:
-            process.terminate()
-            try:
-                process.wait(timeout=15)
-            except subprocess.TimeoutExpired:
+        }
+        env.update(
+            DATABASE_URL=test_url,
+            EVENT_EVOLUTION_ENABLED="true",
+            WEB_CONCURRENCY="1",
+            JWT_SECRET="isolated-process-fixture-only",
+            EVOLUTION_CREDENTIAL_PUBLIC_KEY_B64="",
+        )
+        with (logs / "migrations.log").open("w") as output:
+            subprocess.run(
+                [
+                    str(ROOT / "infra/migrations/.venv/bin/python"),
+                    "-m",
+                    "alembic",
+                    "upgrade",
+                    "head",
+                ],
+                cwd=ROOT / "infra/migrations",
+                env=env,
+                stdout=output,
+                stderr=subprocess.STDOUT,
+                timeout=120,
+                check=True,
+            )
+        with psycopg.connect(raw_url) as conn:
+            report["schema"] = conn.execute("SELECT version_num FROM alembic_version").fetchone()[0]
+        if report["schema"] != "0067":
+            raise RuntimeError("unexpected migration head; audit assumptions require review")
+        sink = ThreadingHTTPServer(("127.0.0.1", 0), RejectExternalCalls)
+        threading.Thread(target=sink.serve_forever, daemon=True).start()
+        for key in (
+            "DATA_SERVICE_URL",
+            "PAPER_SERVICE_URL",
+            "DASHBOARD_SERVICE_URL",
+            "ORCHESTRATION_SERVICE_URL",
+            "LLM_BASE_URL",
+        ):
+            env[key] = f"http://127.0.0.1:{sink.server_port}"
+        process = None
+        try:
+            with (logs / "application.log").open("w") as output:
+
+                def launch() -> tuple[subprocess.Popen, int]:
+                    port = free_port()
+                    child = subprocess.Popen(
+                        [
+                            sys.executable,
+                            "-m",
+                            "uvicorn",
+                            "inalpha_evolver.main:app",
+                            "--host",
+                            "127.0.0.1",
+                            "--port",
+                            str(port),
+                        ],
+                        cwd=ROOT / "services/evolver",
+                        env=env,
+                        stdout=output,
+                        stderr=subprocess.STDOUT,
+                    )
+                    return child, port
+
+                process, port = launch()
+                healthy(process, port)
+                # Freeze the owned process before injecting the orphan record: no fixture can dispatch.
+                process.send_signal(signal.SIGSTOP)
+                run_id = asyncio.run(seed_interrupted(raw_url))
+                before = observe(raw_url, run_id)
+                assert before["run"]["status"] == "running"
                 process.kill()
-                process.wait(timeout=5)
-        sink.shutdown()
-        sink.server_close()
-    (logs / "receipt.json").write_text(json.dumps(report, indent=2, default=str) + "\n")
-    print(json.dumps({"result": report["result"], "receipt": str(logs / "receipt.json")}))
-    return 0
+                process.wait(timeout=10)
+                report["forced_exit_code"] = process.returncode
+                process, port = launch()
+                healthy(process, port)
+                recovered = observe(raw_url, run_id)
+                assert recovered["run"] == {
+                    "status": "aborted",
+                    "failure_code": "EVOLUTION_SERVICE_RESTARTED",
+                }
+                assert recovered["slots"][0]["outcome"] == "no_change"
+                assert recovered["slots"][0]["llm_cost_usd"] == Decimal("0.0123")
+                assert recovered["slots"][1]["outcome"] == "cancelled"
+                assert recovered["slots"][1]["usage_status"] == "unknown"
+                assert recovered["slots"][1]["error_code"] == "EVOLUTION_SERVICE_RESTARTED"
+                process.terminate()
+                process.wait(timeout=15)
+                report["graceful_exit_code"] = process.returncode
+                process, port = launch()
+                healthy(process, port)
+                assert observe(raw_url, run_id) == recovered
+                assert RejectExternalCalls.calls == 0
+                report.update(
+                    result="passed",
+                    restart_count=2,
+                    downstream_requests=0,
+                    recovered=recovered,
+                    audit_database_retained=True,
+                )
+        finally:
+            if process is not None and process.poll() is None:
+                process.terminate()
+                try:
+                    process.wait(timeout=15)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait(timeout=5)
+            report["downstream_requests"] = RejectExternalCalls.calls
+            sink.shutdown()
+            sink.server_close()
+        print(json.dumps({"result": report["result"], "receipt": str(logs / "receipt.json")}))
+        return 0
 
 
 if __name__ == "__main__":
