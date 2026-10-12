@@ -77,7 +77,10 @@ async def seed_interrupted(database_url: str) -> str:
     from inalpha_evolver.storage import candidates, runs
 
     owner = uuid4()
-    async with await psycopg.AsyncConnection.connect(database_url, row_factory=dict_row) as conn:
+    async with await psycopg.AsyncConnection.connect(
+        database_url, row_factory=dict_row, connect_timeout=5
+    ) as conn:
+        await conn.execute("SET LOCAL statement_timeout='5s'")
         run, _ = await runs.insert_run(
             conn,
             owner_account_id=owner,
@@ -123,9 +126,15 @@ async def seed_interrupted(database_url: str) -> str:
         return str(run["run_id"])
 
 
+async def bounded_seed(database_url: str) -> str:
+    """Bound the frozen-process fixture transaction, including lock and connection waits."""
+    async with asyncio.timeout(15):
+        return await seed_interrupted(database_url)
+
+
 def observe(database_url: str, run_id: str) -> dict:
     """Read only status and cost metadata from this invocation's audit database."""
-    with psycopg.connect(database_url, row_factory=dict_row) as conn:
+    with psycopg.connect(database_url, row_factory=dict_row, connect_timeout=5) as conn:
         conn.execute("SET TRANSACTION READ ONLY")
         conn.execute("SET LOCAL statement_timeout='5s'")
         run = conn.execute(
@@ -265,7 +274,7 @@ def main() -> int:
                 # Freeze the owned process before injecting the orphan record: no fixture can dispatch.
                 process.send_signal(signal.SIGSTOP)
                 stopped = True
-                run_id = asyncio.run(seed_interrupted(raw_url))
+                run_id = asyncio.run(bounded_seed(raw_url))
                 before = observe(raw_url, run_id)
                 assert before["run"]["status"] == "running"
                 process.kill()
