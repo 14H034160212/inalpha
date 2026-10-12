@@ -46,13 +46,6 @@ class RejectExternalCalls(BaseHTTPRequestHandler):
         pass
 
 
-def free_port() -> int:
-    """Allocate a loopback port; startup health detects allocation races."""
-    with socket.socket() as sock:
-        sock.bind(("127.0.0.1", 0))
-        return int(sock.getsockname()[1])
-
-
 def healthy(process: subprocess.Popen, port: int) -> None:
     """Require the real application's lifespan and all dispatchers to start."""
     deadline = time.monotonic() + 30
@@ -270,23 +263,26 @@ def main() -> int:
             with (logs / "application.log").open("w") as output:
 
                 def launch() -> tuple[subprocess.Popen, int]:
-                    port = free_port()
-                    child = subprocess.Popen(
-                        [
-                            sys.executable,
-                            "-m",
-                            "uvicorn",
-                            "inalpha_evolver.main:app",
-                            "--host",
-                            "127.0.0.1",
-                            "--port",
-                            str(port),
-                        ],
-                        cwd=ROOT / "services/evolver",
-                        env=env,
-                        stdout=output,
-                        stderr=subprocess.STDOUT,
-                    )
+                    # Pass the bound listener to uvicorn; no close-and-rebind allocation race.
+                    with socket.socket() as listener:
+                        listener.bind(("127.0.0.1", 0))
+                        listener.listen(128)
+                        port = int(listener.getsockname()[1])
+                        child = subprocess.Popen(
+                            [
+                                sys.executable,
+                                "-m",
+                                "uvicorn",
+                                "inalpha_evolver.main:app",
+                                "--fd",
+                                str(listener.fileno()),
+                            ],
+                            pass_fds=(listener.fileno(),),
+                            cwd=ROOT / "services/evolver",
+                            env=env,
+                            stdout=output,
+                            stderr=subprocess.STDOUT,
+                        )
                     return child, port
 
                 process, port = launch()
@@ -308,6 +304,10 @@ def main() -> int:
                     "status": "aborted",
                     "failure_code": "EVOLUTION_SERVICE_RESTARTED",
                 }
+                assert recovered["slots"][0] == before["slots"][0]
+                assert recovered["slots"][0]["usage_status"] == "known"
+                assert recovered["slots"][0]["input_tokens"] == 11
+                assert recovered["slots"][0]["output_tokens"] == 13
                 assert recovered["slots"][0]["outcome"] == "no_change"
                 assert recovered["slots"][0]["llm_cost_usd"] == Decimal("0.0123")
                 assert recovered["slots"][1]["outcome"] == "cancelled"
@@ -341,6 +341,8 @@ def main() -> int:
             report["configured_downstream_requests"] = RejectExternalCalls.calls
             sink.shutdown()
             sink.server_close()
+            if RejectExternalCalls.calls:
+                raise AssertionError("configured downstream requests observed during cleanup")
         return 0
 
 
