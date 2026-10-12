@@ -1,20 +1,25 @@
 {
-  "database": "inalpha_process_audit_74078235405442e6b7648b7185da08ce",
+  "database": "inalpha_process_audit_ae9c32fe94a54a0c81fa9991ba1c9b72",
   "scope": "isolated complete Evolver application; synthetic E1 records",
   "e2_authorized_baseline_recovery": "not tested",
   "production_recovery": "not tested",
   "fixture_known_cost_usd": "0.0123",
-  "actual_model_calls": 0,
+  "provider_credentials": "none; unusable fixture only",
   "result": "passed",
-  "checkout_head": "0d3f2e36fc486b42281856d4d85d86b35fa6ba7c",
-  "runtime_source_tree": "c0d4747d354ea8f275a1f2b5a4006570f2a615c7",
+  "checkout_head": "bfcf62974f81434d62e67644dc25c26d8767060c",
+  "runtime_source_trees": {
+    "services/evolver/src": "c0d4747d354ea8f275a1f2b5a4006570f2a615c7",
+    "services/paper/src": "e5e0c93175b2a9567a8aa965099adbb0f7fa7acc",
+    "services/_shared": "82bb0aae53142fda8e5784536b8f775e6a6dba93"
+  },
+  "dotenv_files_absent": true,
   "runtime_source_clean": true,
   "audit_database_retained": true,
   "schema": "0067",
   "forced_exit_code": -9,
-  "graceful_exit_code": -15,
+  "sigterm_exit_code": -15,
   "restart_count": 2,
-  "downstream_requests": 0,
+  "configured_downstream_requests": 0,
   "recovered": {
     "run": {
       "status": "aborted",
