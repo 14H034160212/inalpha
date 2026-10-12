@@ -1,0 +1,40 @@
+{
+  "validated_at": "2026-10-12",
+  "scope": "development materials and offline runner only",
+  "source": "Yahoo Finance via yfinance",
+  "auto_adjust": false,
+  "sessions": 542,
+  "start": "2024-05-07",
+  "end": "2026-07-07",
+  "market_hash": "c63fecf18f6d3228957876ae43d4dbb1eb07ae6ef90e992a37effb356c26ddd0",
+  "cases": 10,
+  "first_decision": "2026-05-01T20:00:00+00:00",
+  "last_decision": "2026-05-14T20:00:00+00:00",
+  "threshold": 0.037953797953122995,
+  "checks": {
+    "material_validator": "passed",
+    "research_tests": {
+      "passed": 214,
+      "postgres_skipped": 3
+    },
+    "new_module_mypy": "passed",
+    "ruff": "passed",
+    "consistency_failures": 0
+  },
+  "real_model_campaign": "pending explicit budget authorization",
+  "remaining": [
+    "real provider campaign and ledger reconciliation",
+    "compute-matched parameter calibration",
+    "exact tokenizer-matched intervention control",
+    "human blinded process annotation/review",
+    "formal protocol freeze and separate formal cases"
+  ],
+  "model_metadata": {
+    "alias": "deepseek-flash",
+    "provider_documented_version": "DeepSeek-V4.1-Flash",
+    "immutable_revision": null,
+    "training_cutoff": null,
+    "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+    "checked_at": "2026-10-12"
+  }
+}
