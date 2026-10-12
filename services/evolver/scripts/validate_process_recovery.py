@@ -160,6 +160,15 @@ def record_receipt(logs: Path, report: dict):
         raise
     finally:
         (logs / "receipt.json").write_text(json.dumps(report, indent=2, default=str) + "\n")
+        print(
+            json.dumps(
+                {
+                    "result": report["result"],
+                    "database": report.get("database"),
+                    "receipt": str(logs / "receipt.json"),
+                }
+            )
+        )
 
 
 def main() -> int:
@@ -332,15 +341,6 @@ def main() -> int:
             report["configured_downstream_requests"] = RejectExternalCalls.calls
             sink.shutdown()
             sink.server_close()
-        print(
-            json.dumps(
-                {
-                    "result": report["result"],
-                    "database": database,
-                    "receipt": str(logs / "receipt.json"),
-                }
-            )
-        )
         return 0
 
 
