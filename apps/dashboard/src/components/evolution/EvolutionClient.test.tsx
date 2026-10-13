@@ -10,7 +10,7 @@ const state = vi.hoisted(() => ({
 }));
 vi.mock("swr", () => ({ default: (key: string) => key.endsWith("loops") ? state.loops : state.campaigns }));
 vi.mock("@/lib/use-evolution-runs", () => ({ useEvolutionRuns: () => state.runs }));
-vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
+vi.mock("next-intl", () => ({ useLocale: () => "zh", useTranslations: () => (key: string) => key }));
 vi.mock("@/i18n/navigation", () => ({ Link: ({ children }: { children: React.ReactNode }) => <span>{children}</span> }));
 vi.mock("@/components/ui/LiveStrip", () => ({ LiveStrip: () => null }));
 vi.mock("./EvolutionLoopTable", () => ({ EvolutionLoopTable: () => <section>E2 workflows</section> }));

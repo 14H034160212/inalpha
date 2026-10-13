@@ -9,6 +9,9 @@ import { Link } from "@/i18n/navigation";
 
 type Preparation = {
   status: string;
+  independent_upper_bound_by_type?: Record<string, number>;
+  event_availability?: { first_available_at: string | null; snapshot_fact_versions: number };
+  dataset_manifest?: { latest_bar_ts: string; cutoff_bar_ts: string; freshness_lag_seconds: number; warnings: string[] };
   event_snapshot_id?: string;
   seed_source_hash?: string;
   dataset_content_sha256?: string;
@@ -164,6 +167,13 @@ export function EvolutionPreparation({ targetKind, targetId }: { targetKind: str
         {result.selection_start && <p className="break-words font-mono text-xs text-fg-muted">{text("选择段", "Selection window")}: {date(result.selection_start)} — {date(result.selection_end)}</p>}
         {result.partition_bar_counts && <p className="border-t border-border-subtle pt-4 font-mono text-sm">{text("发现 / 选择 / 封存行情根数", "Discovery / selection / sealed bars")}: {result.partition_bar_counts.discovery} / {result.partition_bar_counts.selection} / {result.partition_bar_counts.holdout}</p>}
         {result.selection_fact_count !== undefined && <p className="font-mono text-sm">{text("选择段事实数", "Selection facts")}: {result.selection_fact_count} · {text("独立事件上界", "Independent-event upper bound")}: {result.independent_event_upper_bound} / {result.minimum_matched_event_pairs}</p>}
+        {result.dataset_manifest && <div className="space-y-2 border-t border-border-subtle pt-3 text-xs text-fg-muted">
+          <p>{text("最新行情 / 要求末根", "Latest bar / required cutoff")}: {date(result.dataset_manifest.latest_bar_ts)} / {date(result.dataset_manifest.cutoff_bar_ts)}</p>
+          <p>{text("新鲜度差值（秒）", "Freshness lag (seconds)")}: {result.dataset_manifest.freshness_lag_seconds}</p>
+          {result.dataset_manifest.warnings.map(warning => <p key={warning} className="text-gold">{warning}</p>)}
+        </div>}
+        {result.event_availability && <p className="text-xs text-fg-muted">{text("快照首次可见 / 事实版本", "First snapshot availability / fact versions")}: {date(result.event_availability.first_available_at ?? undefined)} / {result.event_availability.snapshot_fact_versions}</p>}
+        {result.independent_upper_bound_by_type && <details className="text-xs text-fg-muted"><summary>{text("按事件类型查看独立上界", "Independent upper bounds by event type")}</summary><dl className="mt-2 grid grid-cols-2 gap-2">{Object.entries(result.independent_upper_bound_by_type).map(([type, count]) => <div key={type}><dt>{type}</dt><dd className="font-mono">{count}</dd></div>)}</dl></details>}
         <p className="max-w-3xl text-xs leading-relaxed text-fg-muted">{text("事件上界不是匹配对照数。匹配对照、FDR 与 holdout 尚未评估；等待新事件不能补齐已经冻结的旧窗口。", "The event upper bound is not a matched-control count. Matching, FDR and holdout remain unevaluated. New events cannot fill an old frozen window.")}</p>
         {result.status === "necessary_inputs_present" && !approval && !loopId && <Button disabled={busy} onClick={() => void requestApproval()}>{text("冻结输入并查看费用审批", "Freeze inputs and review cost approval")}</Button>}
         {result.inherited_window && <details className="border-t border-border-subtle pt-3 text-xs text-fg-muted"><summary className="cursor-pointer transition-colors hover:text-fg">{text("原策略窗口（未修改）", "Original strategy window (unchanged)")}</summary><p className="mt-3 break-words font-mono">{date(result.inherited_window.from_ts)} — {date(result.inherited_window.as_of)}</p></details>}

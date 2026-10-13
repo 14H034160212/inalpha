@@ -7,6 +7,12 @@ import { resolveEvolutionTarget } from "../tools/evolution-target.js";
 import { createAutomaticEventSnapshot } from "../tools/evolver.js";
 import { getEvolverClient, type ToolRequestContext } from "../tools/evolver-shared.js";
 
+/** Known input failures are completed checks, not infrastructure outages. */
+export const EXPERIMENT_DATA_BLOCKERS = new Set([
+  "EVOLUTION_DATA_GAP_INVALID", "EVOLUTION_DATA_LIMIT_EXCEEDED",
+  "EVOLUTION_DATA_RANGE_INVALID", "EVOLUTION_DATA_STALE",
+]);
+
 export const experimentInputSchema = z.object({
   targetKind: z.enum(["strategy_candidate", "paper_runner", "backtest_run", "e1_candidate"]),
   targetId: z.string().uuid(),
@@ -27,7 +33,7 @@ export function suggestExperimentWindow(facts: Array<Record<string, unknown>>, t
 }
 
 /** Read the owned seed before any Data request; preparing creates no execution authority. */
-export async function prepareExperiment(input: z.infer<typeof experimentInputSchema>, rc: ToolRequestContext, existingSnapshotId?: string) {
+export async function prepareExperiment(input: z.infer<typeof experimentInputSchema>, rc: ToolRequestContext, existingSnapshotId?: string, sampledAt = Date.now()) {
   const target = await resolveEvolutionTarget(input.targetKind, input.targetId, rc);
   if (target.next_action === "inspect_loop") return { status: "existing_experiment", target, execution_authorized: false };
   if (target.next_action !== "start_loop" || !target.start_input?.seedStrategyId) {
@@ -36,7 +42,7 @@ export async function prepareExperiment(input: z.infer<typeof experimentInputSch
   const inherited = target.start_input.config;
   const step = ({ "15m": 900_000, "1h": 3_600_000, "4h": 14_400_000 } as Record<string, number>)[inherited.timeframe];
   if (!step) throw new Error("E2_TIMEFRAME_UNSUPPORTED");
-  const cutoff = input.window?.as_of ?? new Date(Math.floor(Date.now() / step) * step).toISOString();
+  const cutoff = input.window?.as_of ?? new Date(Math.floor(sampledAt / step) * step).toISOString();
   if (Date.parse(cutoff) > Date.now() || (input.window && Date.parse(input.window.from_ts) >= Date.parse(cutoff))) {
     throw new Error("EXPERIMENT_WINDOW_INVALID");
   }
@@ -50,7 +56,15 @@ export async function prepareExperiment(input: z.infer<typeof experimentInputSch
     event_snapshot_id: frozen.snapshotId, event_asset_code: frozen.asset.event_asset_code, config,
   });
   return {
-    ...preflight, target, config, window_source: input.window ? "explicit" : "first_available_event",
+    ...preflight, target, config,
+    sampled_at: new Date(sampledAt).toISOString(),
+    event_availability: {
+      first_available_at: (frozen.facts ?? []).map(fact => fact.available_at)
+        .filter((value): value is string => typeof value === "string" && Number.isFinite(Date.parse(value)))
+        .sort((a, b) => Date.parse(a) - Date.parse(b))[0] ?? null,
+      snapshot_fact_versions: frozen.facts?.length ?? 0,
+    },
+    window_source: input.window ? "explicit" : "first_available_event",
     inherited_window: { from_ts: inherited.from_ts, as_of: inherited.as_of },
     model_calls: 0, execution_authorized: false,
   };
@@ -64,7 +78,15 @@ export const prepareExperimentHandler: Handler = async c => {
     const owner = await verifyToken(token);
     if (!owner.sub || owner.token_use !== undefined) return c.json({ error: "unauthorized" }, 401);
   } catch { return c.json({ error: "unauthorized" }, 401); }
-  const input = experimentInputSchema.safeParse(await c.req.json().catch(() => null));
+  const body = await c.req.json().catch(() => null);
+  if (z.object({ mode: z.literal("coverage_matrix") }).strict().safeParse(body).success) {
+    c.header("Cache-Control", "no-store");
+    try {
+      const { prepareCoverageMatrix } = await import("./coverage-matrix.js");
+      return c.json(await prepareCoverageMatrix({ authToken: token }));
+    } catch { return c.json({ error: "EXPERIMENT_PREPARATION_UNAVAILABLE" }, 502); }
+  }
+  const input = experimentInputSchema.safeParse(body);
   if (!input.success) return c.json({ error: "EXPERIMENT_INPUT_INVALID" }, 400);
   if (input.data.window && (Date.parse(input.data.window.as_of) > Date.now()
     || Date.parse(input.data.window.from_ts) >= Date.parse(input.data.window.as_of))) {
@@ -74,7 +96,7 @@ export const prepareExperimentHandler: Handler = async c => {
     c.header("Cache-Control", "no-store");
     return c.json(await prepareExperiment(input.data, { authToken: token }));
   } catch (error) {
-    if (error instanceof HttpClientError && ["EVOLUTION_DATA_GAP_INVALID", "EVOLUTION_DATA_LIMIT_EXCEEDED", "EVOLUTION_DATA_RANGE_INVALID", "EVOLUTION_DATA_STALE"].includes(error.code)) {
+    if (error instanceof HttpClientError && EXPERIMENT_DATA_BLOCKERS.has(error.code)) {
       return c.json({ status: "blocked", blocker_codes: [error.code], model_calls: 0, execution_authorized: false });
     }
     return c.json({ error: "EXPERIMENT_PREPARATION_UNAVAILABLE" }, error instanceof HttpClientError && error.status === 404 ? 404 : 502);
