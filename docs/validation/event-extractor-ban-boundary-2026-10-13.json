@@ -12,20 +12,38 @@
   },
   "change": {
     "extractor_version": "deterministic-event-extractor-v3",
-    "prohibition_terms": ["ban", "bans", "banned", "banning"],
-    "matching": "Word boundaries after existing lowercase normalization",
+    "prohibition_terms": [
+      "ban",
+      "bans",
+      "banned",
+      "banning"
+    ],
+    "matching": "ASCII letter/digit/underscore boundaries after lowercase normalization, allowing adjacent CJK text",
     "rule_precedence": "unchanged",
     "availability_semantics": "unchanged",
     "historical_rewrite_or_reextraction": false
   },
   "verification": {
-    "regression_before": {"failed": 4, "passed": 7},
-    "related_tests_after": {"passed": 24},
-    "research_non_integration": {"passed": 230, "skipped_database_unconfigured": 3, "deselected_integration": 4},
+    "regression_before": {
+      "failed": 4,
+      "passed": 7
+    },
+    "related_tests_after": {
+      "passed": 29
+    },
+    "research_non_integration": {
+      "passed": 235,
+      "skipped_database_unconfigured": 3,
+      "deselected_integration": 4
+    },
     "ruff": "passed",
     "mypy": "Two existing raw_payload narrowing errors reproduced from origin/main; not clean",
-    "consistency": {"passed": 19, "failed": 0, "existing_warnings": 12},
-    "independent_review": "Exact 871edc74 reviewed; 24 tests independently passed; no new blocker, not full semantic certification"
+    "consistency": {
+      "passed": 19,
+      "failed": 0,
+      "existing_warnings": 12
+    },
+    "independent_review": "871edc74 reviewed independently with 24 tests; subsequent CJK-boundary increment reviewed separately"
   },
   "deployment": "pending; production remains v2 until a separately recorded fixed-image deployment",
   "boundaries": [
@@ -34,5 +52,6 @@
     "No evidence that five-generation research, matching, FDR or Forward passed",
     "Other substring rules and different-URL semantic duplication remain outside this narrow correction",
     "Current v2 coverage observations cannot certify semantic input quality"
-  ]
+  ],
+  "follow_up": "https://github.com/mirror29/inalpha/issues/234"
 }

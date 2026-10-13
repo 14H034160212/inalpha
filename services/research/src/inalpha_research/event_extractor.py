@@ -22,7 +22,7 @@ _EVENT_RULES: tuple[tuple[str, tuple[str, ...], float], ...] = (
 
 
 EXTRACTOR_VERSION = "deterministic-event-extractor-v3"
-_BAN_WORD = re.compile(r"\bban(?:s|ned|ning)?\b")
+_BAN_WORD = re.compile(r"(?<![a-z0-9_])ban(?:s|ned|ning)?(?![a-z0-9_])")
 _ASSET_NAMES: tuple[tuple[str, str], ...] = (
     ("BTC", r"\bbitcoin\b(?![\s-]+(?:cash|sv|gold)\b)"),
     ("ETH", r"\bethereum\b(?![\s-]+classic\b)"),

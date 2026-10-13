@@ -21,6 +21,11 @@ from inalpha_research.event_extractor import extract_event_fact
         ("Bitcoin: BAN!", "regulatory"),
         ("Bank faces Bitcoin lawsuit", "regulatory"),
         ("比特币监管政策", "regulatory"),
+        ("中国拟ban加密货币交易", "regulatory"),
+        ("比特币banned交易政策", "regulatory"),
+        ("Bancor token activity", "other"),
+        ("Bangladesh Bitcoin activity", "other"),
+        ("Bitcoin exploit followed by ban", "exploit"),
     ],
 )
 def test_ban_word_boundary(title: str, expected: str) -> None:
@@ -35,5 +40,6 @@ def test_ban_word_boundary(title: str, expected: str) -> None:
     }
     fact = extract_event_fact(raw, "first-seen-only-v1")
     assert fact["event_type"] == expected
+    assert fact["extractor_version"] == "deterministic-event-extractor-v3"
     assert fact["available_at"] == "2026-10-13T00:00:01+00:00"
     assert fact["effective_at"] == "2026-10-13T00:00:00+00:00"
