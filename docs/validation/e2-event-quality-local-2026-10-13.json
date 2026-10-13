@@ -25,7 +25,7 @@
       "reason": "Missing quality contract"
     },
     "targeted_python_initial": 44,
-    "final_quality_tests": 9,
+    "final_quality_tests": 10,
     "full_evolver_isolated_database": {
       "tests": 356,
       "passed": 355,
@@ -38,7 +38,7 @@
       "scope": "Existing full automated suite in isolated database; not complete-service fault injection or real-owner paid execution"
     },
     "dashboard_tests": 208,
-    "orchestration_related_tests": 12,
+    "orchestration_related_tests": 15,
     "dashboard_typecheck": "passed",
     "orchestration_typecheck": "passed",
     "dashboard_build": "passed",
@@ -62,7 +62,14 @@
       "Nonempty events with omitted facts fail closed as missing provenance",
       "Standalone Campaign checks coverage and provenance before credential access",
       "UI explicit blocker codes override an unexpected status"
-    ]
+    ],
+    "latest_message_contract_tests": {
+      "python": 20,
+      "orchestration": 15,
+      "ui": 5,
+      "typecheck": "Dashboard and orchestration passed",
+      "full_suite_scope": "355/1 full run preceded final policy/text and structured-error-only changes; exact-head CI must pass"
+    }
   },
   "production_observation": {
     "research_image": "4441cb07297aaa89e719bf7f164e7792084cfd3e",
