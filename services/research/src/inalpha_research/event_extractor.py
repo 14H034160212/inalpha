@@ -12,7 +12,7 @@ _EVENT_RULES: tuple[tuple[str, tuple[str, ...], float], ...] = (
     ("listing", ("listing", "list on", "new pair", "上线", "上币"), 0.75),
     ("exploit", ("exploit", "hack", "drained", "漏洞", "攻击", "被盗"), 1.0),
     ("chain_halt", ("chain halt", "network halt", "paused chain", "停链", "暂停出块"), 1.0),
-    ("regulatory", ("regulator", "sec ", "lawsuit", "ban", "监管", "诉讼"), 0.8),
+    ("regulatory", ("regulator", "sec ", "lawsuit", "监管", "诉讼"), 0.8),
     ("upgrade", ("upgrade", "mainnet", "hard fork", "升级", "主网"), 0.55),
     ("unlock", ("token unlock", "vesting", "解锁"), 0.65),
     ("burn", ("token burn", "burned", "销毁"), 0.5),
@@ -21,7 +21,8 @@ _EVENT_RULES: tuple[tuple[str, tuple[str, ...], float], ...] = (
 )
 
 
-EXTRACTOR_VERSION = "deterministic-event-extractor-v2"
+EXTRACTOR_VERSION = "deterministic-event-extractor-v3"
+_BAN_WORD = re.compile(r"(?<![a-z0-9_])ban(?:s|ned|ning)?(?![a-z0-9_])")
 _ASSET_NAMES: tuple[tuple[str, str], ...] = (
     ("BTC", r"\bbitcoin\b(?![\s-]+(?:cash|sv|gold)\b)"),
     ("ETH", r"\bethereum\b(?![\s-]+classic\b)"),
@@ -43,7 +44,9 @@ def extract_event_fact(raw: dict[str, Any], policy_version: str) -> dict[str, An
     event_type = "other"
     severity = 0.3
     for candidate, terms, candidate_severity in _EVENT_RULES:
-        if any(term in lowered for term in terms):
+        if any(term in lowered for term in terms) or (
+            candidate == "regulatory" and _BAN_WORD.search(lowered) is not None
+        ):
             event_type = candidate
             severity = candidate_severity
             break
