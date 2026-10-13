@@ -12,6 +12,7 @@ import { evolutionOverview } from "@/lib/evolution-presentation";
 import { useEvolutionRuns } from "@/lib/use-evolution-runs";
 import { ErrorState, SkeletonBlock } from "@/components/ui/Feedback";
 import { LiveStrip } from "@/components/ui/LiveStrip";
+import { EvolutionCoverageMatrix } from "./EvolutionCoverageMatrix";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { EvolutionRunTable } from "./EvolutionRunTable";
 import { Link } from "@/i18n/navigation";
@@ -70,6 +71,7 @@ export function EvolutionClient() {
           {t("workflow.chooseStrategy")} →
         </Link>
       </div>
+      <EvolutionCoverageMatrix />
       {hasData && (
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {stats.map((key) => (

@@ -18,6 +18,14 @@ beforeEach(() => {
 });
 
 describe("explicit new experiment preparation", () => {
+  it("freezes the supplied common sample cutoff despite a later processing time", async () => {
+    const sampledAt = Date.parse("2026-10-01T05:42:00Z");
+    const result = await prepareExperiment(input, { authToken: "owner" }, undefined, sampledAt);
+    expect(mocks.freeze.mock.calls[0][0].as_of).toBe("2026-10-01T05:00:00.000Z");
+    expect(result).toMatchObject({ sampled_at: "2026-10-01T05:42:00.000Z", event_availability: {
+      first_available_at: "2026-09-30T03:12:00Z", snapshot_fact_versions: 1,
+    } });
+  });
   it("uses first availability and closed-bar boundary, never publication or returns", () => {
     expect(suggestExperimentWindow([{ available_at: "2026-09-30T03:12:00Z", published_at: "2020-01-01", return: 900 }], "1h", Date.parse("2026-10-10T05:42:00Z"))).toEqual({ from_ts: "2026-09-30T03:00:00.000Z", as_of: "2026-10-10T05:00:00.000Z" });
     expect(suggestExperimentWindow([], "1h", Date.now())).toBeNull();
@@ -49,6 +57,7 @@ describe("explicit new experiment preparation", () => {
 describe("preparation HTTP boundary", () => {
   const app = new Hono().post("/prepare", prepareExperimentHandler);
   it("rejects missing identity and service-scoped tokens", async () => {
+    expect((await app.request("/prepare", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "coverage_matrix" }) })).status).toBe(401);
     expect((await app.request("/prepare", { method: "POST" })).status).toBe(401);
     mocks.verify.mockResolvedValue({ sub: "owner", token_use: "service" });
     expect((await app.request("/prepare", { method: "POST", headers: { Authorization: "Bearer test" } })).status).toBe(401);
