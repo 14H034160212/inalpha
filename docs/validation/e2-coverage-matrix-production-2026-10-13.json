@@ -172,5 +172,40 @@
     "Remaining complete-service fault matrix and error/cost presentation",
     "Bounded owner-approved real search only when necessary input qualifies",
     "Actual champion then 30 real days/3 events Forward, single holdout and explicit adoption"
-  ]
+  ],
+  "gap_audit": {
+    "method": "Read-only production SQL; database inalpha/schema0068; 10s timeout",
+    "completed_extraction_jobs": 371,
+    "raw_without_job": 0,
+    "completed_jobs_without_fact": 0,
+    "asset_labelled_fact_versions": {
+      "BTC": 138,
+      "ETH": 18,
+      "SOL": 5
+    },
+    "labelled_versions_with_empty_asset_ids": {
+      "BTC": 0,
+      "ETH": 0,
+      "SOL": 0
+    },
+    "source_raw_versions_and_distinct_source_ids": {
+      "bitcoin_core_announcements": [
+        5,
+        5
+      ],
+      "coindesk": [
+        244,
+        194
+      ],
+      "cointelegraph": [
+        100,
+        91
+      ],
+      "kraken_blog": [
+        22,
+        22
+      ]
+    },
+    "limits": "No backlog or missing job/fact/empty asset-ID observed. This does not prove semantic asset mapping, extraction quality, cross-source dedup correctness or matched event coverage. Global versions differ from sampled snapshot and selection counts."
+  }
 }
