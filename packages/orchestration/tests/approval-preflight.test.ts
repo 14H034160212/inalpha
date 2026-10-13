@@ -66,3 +66,12 @@ it("keeps structured blockers through middleware without execution", async () =>
   expect(consumeApproved).not.toHaveBeenCalled();
   expect(execute).not.toHaveBeenCalled();
 });
+
+/** Unknown or oversized messages must not become serialized diagnostics. */
+it("filters unknown codes while retaining known blockers", () => {
+  const error = new EvolutionInputBlockedError(["PRIVATE_VALUE", "X".repeat(10000), "E2_EVENT_QUALITY_REVIEW_REQUIRED"]);
+  expect(error.blocker_codes).toEqual(["E2_EVENT_QUALITY_REVIEW_REQUIRED"]);
+  expect(error.message).not.toContain("PRIVATE_VALUE");
+  expect(error.message.length).toBeLessThan(300);
+  expect(new EvolutionInputBlockedError(["NEW_UNKNOWN_CODE"]).blocker_codes).toEqual(["E2_INPUT_PREFLIGHT_INVALID"]);
+});
