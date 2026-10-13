@@ -245,3 +245,11 @@ DATABASE_URL="<local-postgresql-url>" .venv/bin/python scripts/validate_process_
 审计库按本任务授权保留，每次运行均创建一个新的完整 schema；脚本输出库名与回执路径。请控制手动运行次数，存储回收需另行明确授权，脚本不自动删除审计证据。
 
 隔离 checkout 必须没有根、Evolver 工作目录或 infra 的 `.env` 文件；请通过环境变量传入本地 DATABASE_URL。配置的下游端点使用拒绝请求的本地接收器，计数不等于全部出站网络审计。SIGTERM 退出码单独记录，不据此宣称退出码 0 的优雅停机验收。
+
+### Loop 提案响应恢复（0068）
+
+Loop 每代两批模型请求分别持久化 dispatch、响应与费用预留，随后才提交整代假设。已保存响应在有效 owner/授权/租约下复用，不再次调用模型；第一代 scaffold 身份按 campaign 稳定生成。原始 prompt 摘要绑定完整请求，参数变化不能复用旧响应。
+
+请求已登记但响应未保存时，系统无法证明供应商是否计费：保留预留费用并以 `LOOP_PROPOSAL_RESPONSE_UNCONFIRMED` 停止自动重发，也不会启动同代另一批新请求来绕过此状态。应先核对用量，再明确准备并批准新实验；不清除旧预留或伪装为免费重试。响应已保存但缺少 usage 时仍保留未知费用。
+
+该功能先迁移 `0068`（依赖 `0067`），再部署 Evolver；存在批次记录时禁止降级删除。独立 non-Loop campaign 不使用此缓存。53 项相关回归及离线进程注入已通过，生产部署/正常 owner 续跑尚待，详细范围见 [回执](../../docs/validation/e2-proposal-response-recovery-2026-10-12.json)。

@@ -62,10 +62,14 @@ async def propose_generation(
     """Run exactly two proposer calls of four slots, falling back per invalid call."""
     if len(scaffolds) != 8:
         raise ValueError("Agent proposer requires exactly eight scaffold slots")
+    check_recovery = getattr(mutator.llm_client, "check_proposal_recovery", None)
+    if check_recovery is not None:
+        await check_recovery(generation)
     calls = [
         _propose_four(
             mutator,
             generation=generation,
+            batch=index // 4,
             scaffolds=scaffolds[index : index + 4],
             feedback=feedback,
             frozen_facts=frozen_facts,
@@ -100,6 +104,7 @@ async def _propose_four(
     mutator: Mutator,
     *,
     generation: int,
+    batch: int,
     scaffolds: list[HypothesisSpec],
     feedback: list[dict[str, Any]],
     frozen_facts: list[dict[str, Any]],
@@ -126,12 +131,15 @@ async def _propose_four(
     if len(prompt.encode()) + len(_SYSTEM_PROMPT.encode()) > mutator.max_input_utf8_bytes:
         raise _PromptBudgetExceeded("hypothesis proposer prompt exceeds frozen input budget")
     with usage_stage(f"hypothesis:generation:{generation}"):
-        response = await mutator.llm_client.mutate(
-            MutationRequest(
-                system_prompt=_SYSTEM_PROMPT,
-                user_prompt=prompt,
-                max_tokens=mutator.max_output_tokens,
-            )
+        request = MutationRequest(
+            system_prompt=_SYSTEM_PROMPT,
+            user_prompt=prompt,
+            max_tokens=mutator.max_output_tokens,
+        )
+        checkpointed = getattr(mutator.llm_client, "mutate_proposal", None)
+        response = (
+            await checkpointed(request, generation=generation, batch=batch)
+            if checkpointed is not None else await mutator.llm_client.mutate(request)
         )
 
     cost = _cost(mutator, response.cache_metrics)

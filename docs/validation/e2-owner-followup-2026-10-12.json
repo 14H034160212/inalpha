@@ -63,5 +63,25 @@
         "insufficient_evidence; no champion, Forward or holdout"
       ]
     }
+  },
+  "release": {
+    "pr": 228,
+    "merge_sha": "a1aa75ccf4dba6bd933f87bc7375d91d4d4f6b35",
+    "reviewed_head": "ac7ede2a618b477a51f8d58913fe50a279191852",
+    "exact_head_ci": "passed",
+    "main_ci": 38239680885,
+    "images": 38239680937,
+    "review": "Two automated MEDIUM test-quality findings; focused source review found no confirmed implementation blocker. Browser integration remains pending.",
+    "deployment": "aborted by second connection guard before container replacement",
+    "established_connections": [
+      0,
+      2
+    ],
+    "backup": "infra/.env.prod.before-dashboard-20261012T110324Z",
+    "backup_mode": "600",
+    "live_dashboard_sha": "12ac65d551fb75277645b5ee02c14b0e69653924",
+    "live_dashboard_container": "8e7decdc7d9e58ffe690043b2108daf61790a3a2a1a6aeb9b7dd63221fb0924e",
+    "live_dashboard_health": "healthy",
+    "container_ids_changed": false
   }
 }

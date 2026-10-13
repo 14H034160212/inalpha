@@ -253,6 +253,7 @@ async def _execute_campaign(
             if generation == 1 and current["frozen_config"].get("hypotheses_source") == "discovery_scaffold":
                 hypotheses = seed_generation_one(
                     {**snapshot, "facts": proposer_facts}, config.event_asset_code, config.asset_id,
+                    identity_namespace=campaign["campaign_id"],
                 )
             proposed = await propose_generation(
                 mutator,

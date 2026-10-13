@@ -245,7 +245,7 @@ def main() -> int:
             )
         with psycopg.connect(raw_url) as conn:
             report["schema"] = conn.execute("SELECT version_num FROM alembic_version").fetchone()[0]
-        if report["schema"] != "0067":
+        if report["schema"] != "0068":
             raise RuntimeError("unexpected migration head; audit assumptions require review")
         sink = ThreadingHTTPServer(("127.0.0.1", 0), RejectExternalCalls)
         threading.Thread(target=sink.serve_forever, daemon=True).start()
