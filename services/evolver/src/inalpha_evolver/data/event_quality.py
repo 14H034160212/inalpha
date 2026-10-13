@@ -19,14 +19,9 @@ def inspect_event_quality(
     audited false positives. Nonempty unknown versions require an explicit policy
     review; a version number is never compared lexically to certify quality.
     """
-    if facts is None:
-        return {
-            "status": "not_checked",
-            "policy_version": QUALITY_POLICY_VERSION,
-            "blocker_codes": [],
-            "semantic_accuracy": "not_evaluated",
-        }
-    provenance = {str(fact.get("fact_id") or ""): fact.get("extractor_version") for fact in facts}
+    provenance = {
+        str(fact.get("fact_id") or ""): fact.get("extractor_version") for fact in facts or []
+    }
     versions: Counter[str] = Counter()
     legacy = 0
     unverified = 0

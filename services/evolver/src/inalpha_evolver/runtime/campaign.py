@@ -69,13 +69,13 @@ async def execute_campaign(campaign: dict[str, Any], settings: EvolverSettings) 
         return
     config = _campaign_config(campaign)
     dataset, snapshot = await _load_frozen_inputs(campaign, config, settings)
-    quality = inspect_event_coverage(
+    coverage = inspect_event_coverage(
         dataset, [market_event_from_fact(fact) for fact in snapshot["facts"]],
         config.event_asset_code, facts=snapshot["facts"],
-    )["event_quality"]
-    if quality["blocker_codes"]:
-        raise ValidationError("event provenance requires review before model access",
-                              details=quality, code=quality["blocker_codes"][0])
+    )
+    if coverage["status"] == "blocked":
+        raise ValidationError("event inputs require coverage or provenance review before model access",
+                              details=coverage, code=coverage["blocker_codes"][0])
     loop_scope = await campaign_model_scope(campaign)
     mutator = (
         await build_owner_mutator(campaign, settings, loop_scope=loop_scope)

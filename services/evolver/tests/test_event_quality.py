@@ -73,7 +73,8 @@ def test_insufficient_coverage_and_legacy_quality_are_both_explained():
 
 
 @pytest.mark.asyncio
-async def test_campaign_stops_before_credential_access_for_legacy_facts(monkeypatch):
+@pytest.mark.parametrize("legacy", [True, False])
+async def test_campaign_stops_before_credential_access_for_blocked_inputs(monkeypatch, legacy):
     from datetime import UTC, datetime
     from types import SimpleNamespace
     from unittest.mock import AsyncMock
@@ -83,7 +84,7 @@ async def test_campaign_stops_before_credential_access_for_legacy_facts(monkeypa
     from inalpha_evolver.runtime import campaign
 
     data = dataset()
-    events = [event(data, 730 + 24 * i, "regulatory") for i in range(8)]
+    events = [event(data, 730 + 24 * i, "regulatory") for i in range(8 if legacy else 1)]
     facts = [
         {
             "fact_id": value.event_id,
@@ -91,7 +92,9 @@ async def test_campaign_stops_before_credential_access_for_legacy_facts(monkeypa
             "assets": ["BTC"],
             "effective_at": datetime.fromtimestamp(value.effective_at / 1e9, UTC).isoformat(),
             "available_at": datetime.fromtimestamp(value.available_at / 1e9, UTC).isoformat(),
-            "extractor_version": "deterministic-event-extractor-v2",
+            "extractor_version": "deterministic-event-extractor-v2"
+            if legacy
+            else "deterministic-event-extractor-v3",
         }
         for value in events
     ]
@@ -107,7 +110,9 @@ async def test_campaign_stops_before_credential_access_for_legacy_facts(monkeypa
     monkeypatch.setattr(campaign, "campaign_model_scope", scope)
     with pytest.raises(ValidationError) as raised:
         await campaign.execute_campaign({"status": "running"}, SimpleNamespace())
-    assert raised.value.code == "E2_EVENT_QUALITY_REVIEW_REQUIRED"
+    assert raised.value.code == (
+        "E2_EVENT_QUALITY_REVIEW_REQUIRED" if legacy else "E2_INPUT_COVERAGE_INSUFFICIENT"
+    )
     credentials.assert_not_awaited()
     scope.assert_not_awaited()
 
@@ -129,3 +134,11 @@ def test_moving_window_cannot_hide_older_facts_still_sent_to_proposer():
     assert result["status"] == "blocked"
     assert result["event_quality"]["legacy_regulatory_fact_count"] == 1
     assert result["independent_event_upper_bound"] == 8
+
+
+def test_omitted_facts_fail_closed_for_sufficient_events():
+    data = dataset()
+    events = [event(data, 730 + 24 * i) for i in range(8)]
+    result = inspect_event_coverage(data, events, "BTC")
+    assert result["status"] == "blocked"
+    assert result["blocker_codes"] == ["E2_EVENT_PROVENANCE_UNVERIFIED"]
