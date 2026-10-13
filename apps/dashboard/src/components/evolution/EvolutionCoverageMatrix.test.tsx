@@ -10,7 +10,7 @@ describe("coverage matrix presentation", () => {
   const matrix: CoverageMatrix = {
     complete: true, sampled_at: "2026-10-13T01:00:00Z", recommended_target_id: "btc",
     rows: [
-      { asset: "BTC", target_id: "btc", status: "necessary_inputs_present", independent_event_upper_bound: 8, minimum_matched_event_pairs: 8, preparation: { selection_fact_count: 22 } },
+      { asset: "BTC", target_id: "btc", status: "necessary_inputs_present", independent_event_upper_bound: 8, minimum_matched_event_pairs: 8, preparation: { selection_fact_count: 22, dataset_manifest: { latest_bar_ts: "2026-10-13T00:00:00Z", cutoff_bar_ts: "2026-10-13T00:00:00Z", freshness_lag_seconds: 0, warnings: ["dataset warning remains visible"] } } },
       { asset: "SOL", target_id: "sol", status: "blocked", independent_event_upper_bound: 2, minimum_matched_event_pairs: 8, blocker_codes: ["E2_INPUT_COVERAGE_INSUFFICIENT"] },
     ],
   };
@@ -21,6 +21,7 @@ describe("coverage matrix presentation", () => {
     expect(html).toContain("targetId=btc");
     expect(html).toContain(zh ? "选择段独立事件上界不足" : "Selection independent-event upper bound is insufficient");
     expect(html).not.toContain("<button");
+    expect(html).toContain("dataset warning remains visible");
   });
   it("explains partial failure and withholds a recommendation", () => {
     const html = renderToStaticMarkup(createElement(CoverageMatrixResults, { matrix: { ...matrix, complete: false, recommended_target_id: null }, zh: true }));

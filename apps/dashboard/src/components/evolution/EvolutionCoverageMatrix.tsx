@@ -37,7 +37,7 @@ export function EvolutionCoverageMatrix() {
       setMatrix(await response.json());
     } catch { setFailed(true); } finally { setBusy(false); }
   };
-  return <Panel title={text("哪个实验现在可以准备", "Which experiment can be prepared?")}>
+  return <Panel title={text("首轮实验 · BTC / ETH / SOL", "First experiment · BTC / ETH / SOL")}>
     <div className="space-y-4 p-4 sm:p-5">
       <p className="text-sm text-fg-muted">{text("同时检查 BTC、ETH、SOL 的已有模拟盘。每个资产固定选择最早启动的运行中策略；只比较数据覆盖，不比较收益。", "Check existing BTC, ETH and SOL paper runners at one sampling time. Use the oldest running supported runner per asset; compare input coverage, never returns.")}</p>
       <Button disabled={busy} onClick={() => void check()}>{busy ? text("正在检查…", "Checking…") : text("免费检查三个资产", "Check three assets for free")}</Button>
@@ -70,6 +70,7 @@ export function CoverageMatrixResults({ matrix, zh }: { matrix: CoverageMatrix; 
                 {row.preparation.dataset_manifest && <>
                   <p>{text("最新行情 / 要求末根（UTC）", "Latest bar / required cutoff (UTC)")}: {row.preparation.dataset_manifest.latest_bar_ts} / {row.preparation.dataset_manifest.cutoff_bar_ts}</p>
                   <p>{text("新鲜度差值（秒）", "Freshness lag (seconds)")}: {row.preparation.dataset_manifest.freshness_lag_seconds}</p>
+                  {row.preparation.dataset_manifest.warnings.map(warning => <p key={warning} className="text-gold">{warning}</p>)}
                 </>}
                 {row.preparation.independent_upper_bound_by_type && <dl className="grid grid-cols-2 gap-2">{Object.entries(row.preparation.independent_upper_bound_by_type).map(([type, count]) => <div key={type}><dt>{type}</dt><dd className="font-mono">{count}</dd></div>)}</dl>}
               </div>
