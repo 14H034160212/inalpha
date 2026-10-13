@@ -23,3 +23,8 @@ it("freezes server-derived bars, source, dates and model-dependent budget withou
   expect(result?.summary).toMatchObject({ cost_scope: "evolution_generation_only" });
   await expect(evolutionApprovalPreflight("evolver.start_evolution_loop", { ...input, maxCostUsd: 0.000001 }, ctx)).rejects.toThrow("LOOP_BUDGET_INSUFFICIENT");
 });
+
+it("surfaces quality and provenance blockers without creating approval", async () => {
+  mocks.prepare.mockResolvedValue({ status: "blocked", blocker_codes: ["E2_EVENT_QUALITY_REVIEW_REQUIRED", "E2_EVENT_PROVENANCE_UNVERIFIED"] });
+  await expect(evolutionApprovalPreflight("evolver.start_evolution_loop", input, ctx)).rejects.toThrow("E2_EVENT_QUALITY_REVIEW_REQUIRED, E2_EVENT_PROVENANCE_UNVERIFIED");
+});

@@ -30,7 +30,9 @@ export async function evolutionApprovalPreflight(toolName: string, input: unknow
     }, rc, raw.experiment?.eventSnapshotId);
     if (prepared.status === "existing_experiment" && raw.experiment) return { input: raw };
     if (prepared.status !== "necessary_inputs_present" || !("config" in prepared)) {
-      throw new Error("E2_INPUT_COVERAGE_INSUFFICIENT: inspect preparation; no generation started");
+      const codes = "blocker_codes" in prepared && Array.isArray(prepared.blocker_codes)
+        ? prepared.blocker_codes.filter((code): code is string => typeof code === "string") : [];
+      throw new Error(`${codes.join(", ") || "E2_INPUT_COVERAGE_INSUFFICIENT"}: inspect preparation; no generation started`);
     }
     const data = prepared as Record<string, unknown>;
     const config = data.config as { from_ts: string; as_of: string };

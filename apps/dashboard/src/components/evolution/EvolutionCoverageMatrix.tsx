@@ -5,6 +5,7 @@ import { useLocale } from "next-intl";
 import { Panel } from "@/components/ui/Panel";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { EventQualityNotice, type EventQuality } from "./EventQualityNotice";
 
 export type CoverageMatrix = {
   complete: boolean;
@@ -12,7 +13,7 @@ export type CoverageMatrix = {
   recommended_target_id: string | null;
   rows: Array<{ asset: string; target_id: string | null; status: string;
     minimum_matched_event_pairs?: number; independent_event_upper_bound?: number; blocker_codes?: string[];
-    preparation?: { config?: { timeframe: string; from_ts: string; as_of: string };
+    preparation?: { event_quality?: EventQuality; config?: { timeframe: string; from_ts: string; as_of: string };
       selection_fact_count?: number;
       target?: { evidence?: { seed_label?: string } };
       selection_start?: string; selection_end?: string;
@@ -61,6 +62,7 @@ export function CoverageMatrixResults({ matrix, zh }: { matrix: CoverageMatrix; 
             <p>{row.status === "necessary_inputs_present" ? text("必要输入具备，尚未正式评估", "Necessary inputs present; evaluation unverified") : row.status === "existing_experiment" ? text("已有实验，保持冻结", "Existing frozen experiment") : text("暂不可启动", "Not ready to start")}</p>
             <p className="font-mono text-sm">{text("事实 / 独立上界", "Facts / independent upper bound")}: {row.preparation?.selection_fact_count ?? "—"} / {row.independent_event_upper_bound ?? "—"} · {text("所需匹配对照门槛", "Required matched-pair threshold")} {row.minimum_matched_event_pairs ?? "—"}</p>
             {row.preparation?.config && <p className="break-words font-mono text-xs text-fg-muted">{row.preparation.config.from_ts} → {row.preparation.config.as_of}</p>}
+            <EventQualityNotice quality={row.preparation?.event_quality} zh={zh} />
             {row.preparation && <details className="text-xs text-fg-muted">
               <summary className="cursor-pointer">{text("窗口与输入诊断", "Window and input diagnostics")}</summary>
               <div className="mt-3 space-y-2 break-words">
