@@ -19,11 +19,13 @@ from inalpha_paper.event_conversion import market_event_from_fact
 from inalpha_paper.evolution_execution_policy import frozen_protection_kwargs
 from inalpha_paper.execution.exchange import EventExecutionPolicy
 from inalpha_shared.db import get_conn
+from inalpha_shared.errors import ValidationError
 
 from ..api.schemas import CampaignConfig
 from ..campaign_preparation import discovery_facts
 from ..config import EvolverSettings
 from ..data import FrozenBarsLoader, FrozenDataset
+from ..data.event_coverage import inspect_event_coverage
 from ..data.partitions import event_partition_ends
 from ..data.persistent_snapshot import (
     decode_frozen_dataset,
@@ -67,6 +69,13 @@ async def execute_campaign(campaign: dict[str, Any], settings: EvolverSettings) 
         return
     config = _campaign_config(campaign)
     dataset, snapshot = await _load_frozen_inputs(campaign, config, settings)
+    quality = inspect_event_coverage(
+        dataset, [market_event_from_fact(fact) for fact in snapshot["facts"]],
+        config.event_asset_code, facts=snapshot["facts"],
+    )["event_quality"]
+    if quality["blocker_codes"]:
+        raise ValidationError("event provenance requires review before model access",
+                              details=quality, code=quality["blocker_codes"][0])
     loop_scope = await campaign_model_scope(campaign)
     mutator = (
         await build_owner_mutator(campaign, settings, loop_scope=loop_scope)

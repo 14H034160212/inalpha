@@ -110,6 +110,7 @@ async def preflight_loop(
             dataset,
             [market_event_from_fact(fact) for fact in snapshot["facts"]],
             body.campaign.config.event_asset_code,
+            facts=snapshot["facts"],
         ),
         "event_snapshot_id": str(body.campaign.event_snapshot_id),
         "events_sha256": snapshot["events_sha256"],
@@ -152,7 +153,7 @@ async def prepare_experiment(
             **{key: getattr(body.config, key) for key in ("venue", "symbol", "timeframe", "from_ts", "as_of")}
         )
     return {
-        **inspect_event_coverage(dataset, [market_event_from_fact(fact) for fact in snapshot["facts"]], body.event_asset_code),
+        **inspect_event_coverage(dataset, [market_event_from_fact(fact) for fact in snapshot["facts"]], body.event_asset_code, facts=snapshot["facts"]),
         "seed_source_hash": seed.source_hash,
         "dataset_manifest": dataset.manifest.model_dump(mode="json"),
         "event_snapshot_id": str(body.event_snapshot_id),
