@@ -1,3 +1,4 @@
+import { EvolutionInputBlockedError } from "../evolution/preparation-error.js";
 import { loopInputSchema } from "./evolution-loop.js";
 import { prepareExperiment } from "../evolution/preparation.js";
 import { z } from "zod";
@@ -32,7 +33,7 @@ export async function evolutionApprovalPreflight(toolName: string, input: unknow
     if (prepared.status !== "necessary_inputs_present" || !("config" in prepared)) {
       const codes = "blocker_codes" in prepared && Array.isArray(prepared.blocker_codes)
         ? prepared.blocker_codes.filter((code): code is string => typeof code === "string") : [];
-      throw new Error(`${codes.join(", ") || "E2_INPUT_COVERAGE_INSUFFICIENT"}: inspect preparation; no generation started`);
+      throw new EvolutionInputBlockedError(codes);
     }
     const data = prepared as Record<string, unknown>;
     const config = data.config as { from_ts: string; as_of: string };

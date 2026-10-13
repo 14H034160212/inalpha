@@ -1,3 +1,4 @@
+import { EvolutionInputBlockedError } from "../evolution/preparation-error.js";
 import { linkChatOperation, type ChatOperationLink } from "../mastra/llm/chat-operation-store.js";
 import { trustedChatInvocation } from "../mastra/llm/chat-invocation-scope.js";
 /**
@@ -251,6 +252,8 @@ export function withHooks<T extends GenericTool>(tool: T, opts: WithHooksOptions
             return {
               isError: true,
               deniedBy: "preflight",
+              ...(error instanceof EvolutionInputBlockedError
+                ? { code: error.code, blocker_codes: error.blocker_codes } : {}),
               toolName,
               message: formatToolError(error).message,
             };

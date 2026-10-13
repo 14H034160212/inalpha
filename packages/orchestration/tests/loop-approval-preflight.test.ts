@@ -28,3 +28,10 @@ it("surfaces quality and provenance blockers without creating approval", async (
   mocks.prepare.mockResolvedValue({ status: "blocked", blocker_codes: ["E2_EVENT_QUALITY_REVIEW_REQUIRED", "E2_EVENT_PROVENANCE_UNVERIFIED"] });
   await expect(evolutionApprovalPreflight("evolver.start_evolution_loop", input, ctx)).rejects.toThrow("E2_EVENT_QUALITY_REVIEW_REQUIRED, E2_EVENT_PROVENANCE_UNVERIFIED");
 });
+
+/** Machine-readable blockers remain separate from the human message. */
+it("returns a stable code with every structured blocker", async () => {
+  const blocker_codes = ["E2_INPUT_COVERAGE_INSUFFICIENT", "E2_EVENT_QUALITY_REVIEW_REQUIRED"];
+  mocks.prepare.mockResolvedValue({ status: "blocked", blocker_codes });
+  await expect(evolutionApprovalPreflight("evolver.start_evolution_loop", input, ctx)).rejects.toMatchObject({ code: "E2_INPUT_BLOCKED", blocker_codes });
+});
