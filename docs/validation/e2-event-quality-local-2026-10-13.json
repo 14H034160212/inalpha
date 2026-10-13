@@ -38,7 +38,7 @@
       "scope": "Existing full automated suite in isolated database; not complete-service fault injection or real-owner paid execution"
     },
     "dashboard_tests": 208,
-    "orchestration_related_tests": 15,
+    "orchestration_related_tests": 16,
     "dashboard_typecheck": "passed",
     "orchestration_typecheck": "passed",
     "dashboard_build": "passed",
@@ -61,11 +61,12 @@
     "review_corrections": [
       "Nonempty events with omitted facts fail closed as missing provenance",
       "Standalone Campaign checks coverage and provenance before credential access",
-      "UI explicit blocker codes override an unexpected status"
+      "UI explicit blocker codes override an unexpected status",
+      "Stable input-blocked code and finite allowlisted blocker array survive approval middleware; complete backend failure message preserves every reason"
     ],
     "latest_message_contract_tests": {
       "python": 20,
-      "orchestration": 15,
+      "orchestration": 16,
       "ui": 5,
       "typecheck": "Dashboard and orchestration passed",
       "full_suite_scope": "355/1 full run preceded final policy/text and structured-error-only changes; exact-head CI must pass"
