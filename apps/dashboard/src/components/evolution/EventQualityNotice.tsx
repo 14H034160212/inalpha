@@ -1,5 +1,6 @@
 export type EventQuality = {
   status: string;
+  blocker_codes?: string[];
   scope?: string;
   policy_version?: string;
   inspected_fact_count?: number;
@@ -10,9 +11,9 @@ export type EventQuality = {
 
 /** Explain known evidence risks without treating version checks as semantic validation. */
 export function EventQualityNotice({ quality, zh }: { quality?: EventQuality; zh: boolean }) {
-  if (!quality || quality.status === "not_checked") return null;
+  if (!quality || quality.status === "not_checked" && !quality.blocker_codes?.length) return null;
   const text = (cn: string, en: string) => zh ? cn : en;
-  const blocked = quality.status === "review_required";
+  const blocked = !!quality.blocker_codes?.length || quality.status === "review_required";
   return <div className="space-y-2 border-t border-border-subtle pt-3 text-sm text-fg-muted">
     {blocked && <div role="alert" className="space-y-2 text-gold">
       <p>{text("事件质量待核查，暂不能启动搜索。", "Event quality needs review; search cannot start.")}</p>

@@ -24,4 +24,11 @@ describe("event quality notice", () => {
   it("does not invent a check for an old response", () => {
     expect(renderToStaticMarkup(createElement(EventQualityNotice, { zh: true }))).toBe("");
   });
+  it("honors an explicit blocker even with an unexpected status", () => {
+    const html = renderToStaticMarkup(createElement(EventQualityNotice, { zh: true, quality: {
+      status: "not_checked", blocker_codes: ["E2_EVENT_PROVENANCE_UNVERIFIED"],
+    } }));
+    expect(html).toContain('role="alert"');
+    expect(html).toContain("暂不能启动搜索");
+  });
 });
