@@ -29,4 +29,10 @@ describe("coverage matrix presentation", () => {
     expect(html).toContain("本轮不推荐首选实验");
     expect(html).not.toContain("本轮优先准备");
   });
+  it("explains inventory limits without suggesting a login failure", () => {
+    const html = renderToStaticMarkup(createElement(CoverageMatrixResults, { matrix: { ...matrix, complete: false, recommended_target_id: null, rows: [{ asset: "BTC", target_id: null, status: "unavailable", blocker_codes: ["RUNNER_INVENTORY_INCOMPLETE"] }] }, zh: true }));
+    expect(html).toContain("运行任务列表达到盘点上限");
+    expect(html).toContain("从策略详情逐项准备");
+  });
+
 });

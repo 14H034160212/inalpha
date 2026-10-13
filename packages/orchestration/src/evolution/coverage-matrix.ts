@@ -1,5 +1,6 @@
 /** Compare owned research inputs at one sampling time without ranking returns. */
-import { resolveRequestToken } from "../auth.js";
+import { mintServiceToken, resolveRequestSubject, resolveRequestToken } from "../auth.js";
+import { DataClient } from "../clients/data.js";
 import { PaperClient } from "../clients/paper.js";
 import { HttpClientError } from "../clients/http.js";
 import { getSettings } from "../config.js";
@@ -32,12 +33,27 @@ export async function prepareCoverageMatrix(rc: ToolRequestContext) {
   const sampledAt = Date.now();
   const token = await resolveRequestToken(rc);
   const paper = new PaperClient({ baseUrl: getSettings().paperServiceUrl, token, timeoutMs: 30_000 });
-  const runners = await paper.listStrategyRuns({ status: "running" });
+  const runners = await paper.listStrategyRuns({ status: "running", limit: 200 });
   // The owner list is capped at 200; do not claim the oldest runner from a truncated inventory.
-  if (runners.length >= 200) throw new Error("RUNNER_INVENTORY_INCOMPLETE");
+  if (runners.length >= 200) return {
+    sampled_at: new Date(sampledAt).toISOString(), complete: false, recommended_target_id: null,
+    rows: ASSETS.map(asset => ({ asset, target_id: null, status: "unavailable", blocker_codes: ["RUNNER_INVENTORY_INCOMPLETE"] })),
+    model_calls: 0, execution_authorized: false,
+  };
+  const owner = await resolveRequestSubject(rc);
+  const assetToken = await mintServiceToken({ sub: owner, token_use: "service", service_audience: "data", token_purpose: "asset_resolve" }, 300);
+  const data = new DataClient({ baseUrl: getSettings().dataServiceUrl, token: assetToken, timeoutMs: 30_000 });
+  const supported = runners.filter(run => run.status === "running" && ["15m", "1h", "4h"].includes(run.timeframe));
+  const keys = [...new Map(supported.map(run => [JSON.stringify([run.venue, run.symbol]), { venue: run.venue, symbol: run.symbol }])).entries()];
+  const assets = new Map<string, string>();
+  // Resolve through Data's authoritative identity parser with at most four concurrent requests.
+  for (let offset = 0; offset < keys.length; offset += 4) {
+    await Promise.all(keys.slice(offset, offset + 4).map(async ([key, identity]) => {
+      assets.set(key, (await data.resolveAsset(identity)).event_asset_code);
+    }));
+  }
   const rows = await Promise.all(ASSETS.map(async (asset): Promise<CoverageRow> => {
-    const runner = runners.filter(run => run.status === "running" && run.symbol.split("/")[0] === asset
-      && ["15m", "1h", "4h"].includes(run.timeframe))
+    const runner = supported.filter(run => assets.get(JSON.stringify([run.venue, run.symbol])) === asset)
       .sort((a, b) => Date.parse(a.started_at) - Date.parse(b.started_at) || a.id.localeCompare(b.id))[0];
     if (!runner) return { asset, target_id: null, status: "blocked", blocker_codes: ["OWNED_RUNNER_UNAVAILABLE"] };
     try {

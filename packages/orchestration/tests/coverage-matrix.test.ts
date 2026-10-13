@@ -1,13 +1,17 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-const mocks = vi.hoisted(() => ({ list: vi.fn(), prepare: vi.fn() }));
-vi.mock("../src/auth.js", () => ({ resolveRequestToken: async () => "owner-token" }));
+const mocks = vi.hoisted(() => ({ list: vi.fn(), prepare: vi.fn(), resolveAsset: vi.fn() }));
+vi.mock("../src/auth.js", () => ({ resolveRequestToken: async () => "owner-token", resolveRequestSubject: async () => "owner", mintServiceToken: async () => "scoped-service-token" }));
 vi.mock("../src/config.js", () => ({ getSettings: () => ({ paperServiceUrl: "http://paper" }) }));
 vi.mock("../src/clients/paper.js", () => ({ PaperClient: class { listStrategyRuns = mocks.list; } }));
 vi.mock("../src/evolution/preparation.js", () => ({ prepareExperiment: mocks.prepare, EXPERIMENT_DATA_BLOCKERS: new Set(["EVOLUTION_DATA_STALE"]) }));
+vi.mock("../src/clients/data.js", () => ({ DataClient: class { resolveAsset = mocks.resolveAsset; } }));
 import { HttpClientError } from "../src/clients/http.js";
 import { prepareCoverageMatrix, selectCoverageTarget } from "../src/evolution/coverage-matrix.js";
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  mocks.resolveAsset.mockImplementation(async ({ symbol }) => ({ event_asset_code: symbol.startsWith("BTC") ? "BTC" : "ETH" }));
+});
 describe("coverage-only selection", () => {
   it("excludes blocked rows even with high counts and uses deterministic asset ties", () => {
     expect(selectCoverageTarget([
@@ -20,7 +24,7 @@ describe("coverage-only selection", () => {
   it("uses one sampling time, oldest owned runner, and keeps per-asset failures blocked", async () => {
     mocks.list.mockResolvedValue([
       { id: "later", status: "running", symbol: "BTC/USDT", timeframe: "1h", started_at: "2026-10-02" },
-      { id: "earlier", status: "running", symbol: "BTC/USDT", timeframe: "1h", started_at: "2026-10-01" },
+      { id: "earlier", status: "running", venue: "coinbase", symbol: "BTC-USD", timeframe: "1h", started_at: "2026-10-01" },
       { id: "eth", status: "running", symbol: "ETH/USDT", timeframe: "4h", started_at: "2026-10-01" },
     ]);
     mocks.prepare.mockImplementation(async (input) => {
@@ -38,7 +42,7 @@ describe("coverage-only selection", () => {
   });
   it("excludes known bad inputs while retaining a fully checked eligible choice", async () => {
     mocks.list.mockResolvedValue([
-      { id: "btc", status: "running", symbol: "BTC/USDT", timeframe: "1h", started_at: "2026-10-01" },
+      { id: "btc", status: "running", venue: "coinbase", symbol: "BTC-USD", timeframe: "1h", started_at: "2026-10-01" },
       { id: "eth", status: "running", symbol: "ETH/USDT", timeframe: "1h", started_at: "2026-10-01" },
     ]);
     mocks.prepare.mockImplementation(async input => {
@@ -48,11 +52,13 @@ describe("coverage-only selection", () => {
     const result = await prepareCoverageMatrix({ authToken: "owner-token" });
     expect(result.complete).toBe(true);
     expect(result.recommended_target_id).toBe("btc");
+    expect(mocks.resolveAsset).toHaveBeenCalledWith({ venue: "coinbase", symbol: "BTC-USD" });
     expect(result.rows[1].status).toBe("blocked");
   });
   it("does not rank a potentially truncated runner inventory", async () => {
     mocks.list.mockResolvedValue(Array.from({ length: 200 }, () => ({})));
-    await expect(prepareCoverageMatrix({ authToken: "owner-token" })).rejects.toThrow("RUNNER_INVENTORY_INCOMPLETE");
+    expect(await prepareCoverageMatrix({ authToken: "owner-token" })).toMatchObject({ complete: false, recommended_target_id: null, rows: [{ blocker_codes: ["RUNNER_INVENTORY_INCOMPLETE"] }, { blocker_codes: ["RUNNER_INVENTORY_INCOMPLETE"] }, { blocker_codes: ["RUNNER_INVENTORY_INCOMPLETE"] }] });
+    expect(mocks.list).toHaveBeenCalledWith({ status: "running", limit: 200 });
     expect(mocks.prepare).not.toHaveBeenCalled();
   });
 
