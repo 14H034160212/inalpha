@@ -48,9 +48,14 @@ export async function prepareCoverageMatrix(rc: ToolRequestContext) {
   const assets = new Map<string, string>();
   // Resolve through Data's authoritative identity parser with at most four concurrent requests.
   for (let offset = 0; offset < keys.length; offset += 4) {
-    await Promise.all(keys.slice(offset, offset + 4).map(async ([key, identity]) => {
+    const resolved = await Promise.allSettled(keys.slice(offset, offset + 4).map(async ([key, identity]) => {
       assets.set(key, (await data.resolveAsset(identity)).event_asset_code);
     }));
+    if (resolved.some(result => result.status === "rejected")) return {
+      sampled_at: new Date(sampledAt).toISOString(), complete: false, recommended_target_id: null,
+      rows: ASSETS.map(asset => ({ asset, target_id: null, status: "unavailable", blocker_codes: ["ASSET_IDENTITY_UNAVAILABLE"] })),
+      model_calls: 0, execution_authorized: false,
+    };
   }
   const rows = await Promise.all(ASSETS.map(async (asset): Promise<CoverageRow> => {
     const runner = supported.filter(run => assets.get(JSON.stringify([run.venue, run.symbol])) === asset)

@@ -62,4 +62,14 @@ describe("coverage-only selection", () => {
     expect(mocks.prepare).not.toHaveBeenCalled();
   });
 
+  it("withholds ranking and preparation when an identity cannot be resolved", async () => {
+    mocks.list.mockResolvedValue([{ id: "btc", venue: "binance", symbol: "BTC/USDT", status: "running", timeframe: "1h", started_at: "2026-10-01" }]);
+    mocks.resolveAsset.mockRejectedValueOnce(new Error("private details"));
+    const result = await prepareCoverageMatrix({ authToken: "owner-token" });
+    expect(result).toMatchObject({ complete: false, recommended_target_id: null });
+    expect(result.rows[0].blocker_codes).toEqual(["ASSET_IDENTITY_UNAVAILABLE"]);
+    expect(mocks.prepare).not.toHaveBeenCalled();
+    expect(JSON.stringify(result)).not.toContain("private details");
+  });
+
 });
