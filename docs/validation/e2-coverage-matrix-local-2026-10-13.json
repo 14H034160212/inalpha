@@ -16,7 +16,7 @@
     "threshold": "Returned by existing Evolver preparation"
   },
   "verification": {
-    "dashboard_tests": 200,
+    "dashboard_tests": 201,
     "orchestration_related_tests": 12,
     "dashboard_typecheck": "passed",
     "orchestration_typecheck": "passed",
@@ -29,7 +29,9 @@
     "review": {
       "fixed": [
         "Known bar-input errors classified blocked, not unavailable",
-        "Potentially truncated owner runner inventory fails closed"
+        "Potentially truncated owner runner inventory fails closed",
+        "Authoritative Data asset resolution for non-slash symbols",
+        "Explicit runner list limit and actionable capped-inventory response"
       ]
     }
   },
