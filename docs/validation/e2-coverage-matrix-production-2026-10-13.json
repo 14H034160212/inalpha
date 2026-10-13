@@ -44,7 +44,6 @@
     "reason": "All assets blocked by E2_INPUT_COVERAGE_INSUFFICIENT",
     "required_minimum_matched_event_pairs": 8,
     "latest_bar_and_required_cutoff": "2026-10-13T03:00:00Z",
-    "freshness_lag_seconds": 0,
     "rows": [
       {
         "asset": "BTC",
@@ -127,7 +126,11 @@
         "snapshot_fact_versions": 5,
         "necessary_inputs": "blocked"
       }
-    ]
+    ],
+    "lag_vs_required_closed_bar_seconds": 0,
+    "bar_open_age_at_sample_seconds": 6386.189,
+    "bar_close_age_at_sample_seconds": 2786.189,
+    "timestamp_interpretation": "03:00 is the opening timestamp of the last closed 1h candle, closing at 04:00; sample 04:46:26.189. Zero lag compares with required closed-bar timestamp, not wall-clock age."
   },
   "source_poll_observation": {
     "window": "Two hours ending before 2026-10-13T04:00Z",
@@ -229,6 +232,9 @@
     },
     "cross_source_identical_url_groups": 0,
     "regulatory_versions_matching_only_unbounded_ban": 17,
-    "finding": "Substring ban matches unrelated words such as bank. Seventeen regulatory rows lack a standalone ban/banned/banning/bans or another configured regulatory keyword. Prospective rule correction is required; no historical mutation or claim of human semantic adjudication. Different-URL semantic duplicates remain unverified."
+    "finding": "Substring ban matches unrelated words such as bank. Seventeen regulatory rows lack a standalone ban/banned/banning/bans or another configured regulatory keyword. Prospective rule correction is required; no historical mutation or claim of human semantic adjudication. Different-URL semantic duplicates remain unverified.",
+    "correction_pr": "https://github.com/mirror29/inalpha/pull/233",
+    "target_extractor": "deterministic-event-extractor-v3",
+    "historical_affected_rows": "Remain immutable and included in existing stored facts; no retrospective exclusion or backdating was applied. Matrix observations are not semantic qualification."
   }
 }
