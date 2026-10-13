@@ -207,5 +207,28 @@
       ]
     },
     "limits": "No backlog or missing job/fact/empty asset-ID observed. This does not prove semantic asset mapping, extraction quality, cross-source dedup correctness or matched event coverage. Global versions differ from sampled snapshot and selection counts."
+  },
+  "semantic_audit": {
+    "fact_versions_at_later_sample": 375,
+    "extractor_versions": {
+      "deterministic-event-extractor-v2": 375
+    },
+    "full_name_mentions_without_asset_fact": {
+      "BTC": {
+        "raw_versions": 136,
+        "missing": 0
+      },
+      "ETH": {
+        "raw_versions": 14,
+        "missing": 0
+      },
+      "SOL": {
+        "raw_versions": 4,
+        "missing": 0
+      }
+    },
+    "cross_source_identical_url_groups": 0,
+    "regulatory_versions_matching_only_unbounded_ban": 17,
+    "finding": "Substring ban matches unrelated words such as bank. Seventeen regulatory rows lack a standalone ban/banned/banning/bans or another configured regulatory keyword. Prospective rule correction is required; no historical mutation or claim of human semantic adjudication. Different-URL semantic duplicates remain unverified."
   }
 }
