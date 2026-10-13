@@ -16,8 +16,8 @@
     "threshold": "Returned by existing Evolver preparation"
   },
   "verification": {
-    "dashboard_tests": 201,
-    "orchestration_related_tests": 12,
+    "dashboard_tests": 203,
+    "orchestration_related_tests": 13,
     "dashboard_typecheck": "passed",
     "orchestration_typecheck": "passed",
     "dashboard_build": "passed",
@@ -31,7 +31,9 @@
         "Known bar-input errors classified blocked, not unavailable",
         "Potentially truncated owner runner inventory fails closed",
         "Authoritative Data asset resolution for non-slash symbols",
-        "Explicit runner list limit and actionable capped-inventory response"
+        "Explicit runner list limit and actionable capped-inventory response",
+        "Structured asset-identity failure without incomplete ranking",
+        "React DOM interaction regression for free POST, pending clicks, stale results and failed transport"
       ]
     }
   },
