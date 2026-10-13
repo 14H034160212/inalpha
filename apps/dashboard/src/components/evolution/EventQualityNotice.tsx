@@ -26,7 +26,7 @@ export function EventQualityNotice({ quality, zh }: { quality?: EventQuality; zh
       <div className="mt-2 space-y-2 break-words">
         <p>{text("检查范围：发现上下文与选择段（含窗口前已可见事实）", "Scope: discovery context and selection (including earlier visible facts)")} · {quality.inspected_fact_count ?? "—"}</p>
         {Object.entries(quality.extractor_version_counts ?? {}).map(([version, count]) => <p key={version} className="font-mono">{version}: {count}</p>)}
-        <p>{text("此项只检查已知版本缺陷；事件语义、匹配对照和 FDR 尚未验证。", "This checks known version defects only; semantics, matched controls and FDR remain unverified.")}</p>
+        <p>{text("此项仅检查旧版监管 ban 分类风险与来源版本；listing、SEC 等其他分类尚未核查，事件语义、匹配对照和 FDR 尚未验证。", "This checks legacy regulatory ban risks and provenance only; listing, SEC and other classifications are not audited; semantics, matched controls and FDR remain unverified.")}</p>
       </div>
     </details>
   </div>;

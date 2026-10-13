@@ -2,7 +2,7 @@
   "date": "2026-10-13",
   "scope": "Known legacy event-quality diagnostics and model-access guard; E2 remains incomplete",
   "policy": {
-    "version": "known-extractor-defects-v1",
+    "version": "legacy-regulatory-ban-provenance-v1",
     "known_legacy_extractors": [
       "deterministic-event-extractor-v1",
       "deterministic-event-extractor-v2"

@@ -22,7 +22,7 @@ def test_legacy_regulatory_blocks_even_with_eight_independent_events():
     assert result["status"] == "blocked"
     assert result["blocker_codes"] == ["E2_EVENT_QUALITY_REVIEW_REQUIRED"]
     assert result["event_quality"]["legacy_regulatory_fact_count"] == 8
-    assert result["event_quality"]["policy_version"] == "known-extractor-defects-v1"
+    assert result["event_quality"]["policy_version"] == "legacy-regulatory-ban-provenance-v1"
     assert result["matched_controls"] == result["fdr"] == "not_evaluated"
 
 

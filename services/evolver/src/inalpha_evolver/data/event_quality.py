@@ -5,7 +5,7 @@ from typing import Any
 
 from inalpha_paper.model.market_events import MarketEvent
 
-QUALITY_POLICY_VERSION = "known-extractor-defects-v1"
+QUALITY_POLICY_VERSION = "legacy-regulatory-ban-provenance-v1"
 _LEGACY = {"deterministic-event-extractor-v1", "deterministic-event-extractor-v2"}
 _SUPPORTED = _LEGACY | {"deterministic-event-extractor-v3"}
 

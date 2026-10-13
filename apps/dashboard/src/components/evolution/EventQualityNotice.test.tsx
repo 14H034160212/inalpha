@@ -20,6 +20,7 @@ describe("event quality notice", () => {
     const html = renderToStaticMarkup(createElement(EventQualityNotice, { zh: false, quality: { status: "no_known_legacy_defect", inspected_fact_count: 8 } }));
     expect(html).not.toContain('role="alert"');
     expect(html).toContain("semantics, matched controls and FDR remain unverified");
+    expect(html).toContain("listing, SEC and other classifications are not audited");
   });
   it("does not invent a check for an old response", () => {
     expect(renderToStaticMarkup(createElement(EventQualityNotice, { zh: true }))).toBe("");
