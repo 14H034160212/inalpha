@@ -10,7 +10,7 @@ Inalpha 是 AI agent 编排与多 Python kernel 的量化实验框架。D-12 因
 下单必须经过 `trade.create_plan → trade.approve_plan → trade.execute_plan` 与机器风控。演化研究不会自动 promote、启动 Runner 或下单。
 架构与模块职责见 [架构总图](01-architecture-overview.md) / [内核设计](03-kernel-design.md)。
 
-最新质量守卫发布（2026-10-13）：[PR #236](https://github.com/mirror29/inalpha/pull/236) 已合并，Dashboard / Mastra / Evolver 固定 `76727f6d`，独立 SSH 核对镜像与 healthy；其余七容器未变，schema0068不迁移。精确 head / main CI 与七镜像成功、tree一致。两次连接守卫拒绝均未替换服务，随后四轮空闲检查通过；配置/DB备份600、部署脚本TOC可读，不等于恢复演练。最新自动CR有3项MEDIUM，按实际调用链与子交付边界回应，独立静态增量复核无确认新增阻断，不能称零发现。独立复查公开登录最终200、两个准备接口未登录401、备份600/TOC可读、DB0068/Loop0/campaign0。Chrome刷新与导航后内容空白，后续焦点切至其他项目；曾短暂SSH超时已恢复，正常owner界面结果未可靠读取，原因未确定；不因这个现象重复部署。见 [质量守卫部署回执](validation/e2-event-quality-deployment-2026-10-13.json)。
+最新质量守卫发布（2026-10-13）：[PR #236](https://github.com/mirror29/inalpha/pull/236) 已合并，Dashboard / Mastra / Evolver 固定 `76727f6d`，独立 SSH 核对镜像与 healthy；其余七容器未变，schema0068不迁移。精确 head / main CI 与七镜像成功、tree一致。两次连接守卫拒绝均未替换服务，随后四轮空闲检查通过；配置/DB备份600、部署脚本TOC可读，不等于恢复演练。最新自动CR有3项MEDIUM，按实际调用链与子交付边界回应，独立静态增量复核无确认新增阻断，不能称零发现。独立复查公开登录最终200；Mastra与Evolver的容器内准备接口未登录401，不代表公开准备API路径验收；备份600/TOC可读、DB0068/Loop0/campaign0。Chrome刷新与导航后内容空白，后续焦点切至其他项目；曾短暂SSH超时已恢复，正常owner界面结果未可靠读取，原因未确定；不因这个现象重复部署。见 [质量守卫部署回执](validation/e2-event-quality-deployment-2026-10-13.json)。
 
 此前覆盖矩阵发布（2026-10-13）：PR #231 已合并，Dashboard 与 Mastra 固定部署 `3c8aa389`，均 healthy；其余八容器未变，Evolver 保持 `655e2179`，schema `0068`。精确评审 head 与合并版本差异为空，main CI / 镜像构建成功。四次任务与连接检查均为0，配置/数据库备份权限600，归档目录可读；未进行完整恢复演练。自动 CR 的两项 MEDIUM 已按实际 Paper limit 源码和用户指定三资产范围逐项复核，不能称自动 CR 零发现。见 [生产覆盖与部署回执](validation/e2-coverage-matrix-production-2026-10-13.json)。
 

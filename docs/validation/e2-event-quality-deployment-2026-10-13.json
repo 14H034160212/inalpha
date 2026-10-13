@@ -50,7 +50,12 @@
     "evolver_prepare_no_auth": 401,
     "mastra_prepare_no_auth": 401,
     "backup_permissions": "600",
-    "backup_toc_readable": true
+    "backup_toc_readable": true,
+    "prepare_probe_scope": {
+      "mastra": "container-local localhost4111/evolution/prepare",
+      "evolver": "container-local localhost8005/api/v1/evolution-loops/prepare",
+      "public_preparation_path_verified": false
+    }
   },
   "latest_stored_fact_observation": {
     "timing": "Read-only observation after deployment",
