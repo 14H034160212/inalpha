@@ -1,3 +1,4 @@
+import { EvolutionInputBlockedError } from "../src/evolution/preparation-error.js";
 import { describe, expect, it, vi } from "vitest";
 import { HookRunner } from "../src/hooks/runner.js";
 import { withHooks } from "../src/hooks/with-hooks.js";
@@ -46,4 +47,31 @@ it("projects prepared input into approval and executes that exact input", async 
   await tool.execute({ preparation: "untrusted" });
   expect(consumeApproved).toHaveBeenCalledWith(expect.objectContaining({ approvalInput: preparedInput }));
   expect(execute).toHaveBeenCalledWith(preparedInput, undefined);
+});
+
+/** Preserve safe diagnostics without approval or execution. */
+it("keeps structured blockers through middleware without execution", async () => {
+  const request = vi.fn();
+  const consumeApproved = vi.fn();
+  const execute = vi.fn();
+  const blocker_codes = ["E2_INPUT_COVERAGE_INSUFFICIENT", "E2_EVENT_QUALITY_REVIEW_REQUIRED"];
+  const tool = withHooks({ id: "test.costful", execute }, {
+    runner: new HookRunner(), permissionResolver: () => "ask",
+    getAuthSub: () => "owner", getSessionId: () => "thread",
+    pendingApprovals: { request, consumeApproved } as unknown as PendingApprovalsStore,
+    approvalPreflight: async () => { throw new EvolutionInputBlockedError(blocker_codes); },
+  });
+  expect(await tool.execute({})).toMatchObject({ isError: true, deniedBy: "preflight", code: "E2_INPUT_BLOCKED", blocker_codes });
+  expect(request).not.toHaveBeenCalled();
+  expect(consumeApproved).not.toHaveBeenCalled();
+  expect(execute).not.toHaveBeenCalled();
+});
+
+/** Unknown or oversized messages must not become serialized diagnostics. */
+it("filters unknown codes while retaining known blockers", () => {
+  const error = new EvolutionInputBlockedError(["PRIVATE_VALUE", "X".repeat(10000), "E2_EVENT_QUALITY_REVIEW_REQUIRED"]);
+  expect(error.blocker_codes).toEqual(["E2_EVENT_QUALITY_REVIEW_REQUIRED"]);
+  expect(error.message).not.toContain("PRIVATE_VALUE");
+  expect(error.message.length).toBeLessThan(300);
+  expect(new EvolutionInputBlockedError(["NEW_UNKNOWN_CODE"]).blocker_codes).toEqual(["E2_INPUT_PREFLIGHT_INVALID"]);
 });

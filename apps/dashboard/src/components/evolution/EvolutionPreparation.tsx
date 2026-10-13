@@ -6,9 +6,11 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Panel } from "@/components/ui/Panel";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { EventQualityNotice, type EventQuality } from "./EventQualityNotice";
 
 type Preparation = {
   status: string;
+  event_quality?: EventQuality;
   independent_upper_bound_by_type?: Record<string, number>;
   event_availability?: { first_available_at: string | null; snapshot_fact_versions: number };
   dataset_manifest?: { latest_bar_ts: string; cutoff_bar_ts: string; freshness_lag_seconds: number; warnings: string[] };
@@ -158,10 +160,11 @@ export function EvolutionPreparation({ targetKind, targetId }: { targetKind: str
         <Button disabled={busy || (approval.status !== "approved" && typeof approval.preparation?.estimated_max_cost_usd !== "number")} onClick={() => void approve()}>{approval.status === "approved" ? text("恢复已批准任务", "Recover approved execution") : text("批准并提交此实验", "Approve and submit this experiment")}</Button>
       </div>}
       {result && <div className="space-y-4 rounded-xl border border-border-subtle bg-bg-elev/30 p-4 sm:p-5">
-        <h2 className={`font-display text-xl ${result.status === "blocked" ? "text-gold" : "text-fg"}`}>{result.status === "existing_experiment" ? text("已有实验", "Existing experiment") : result.status === "blocked" ? text("数据尚不足，未启动搜索", "Insufficient inputs; search not started") : text("必要输入具备，尚未通过评估", "Necessary inputs present; evaluation pending")}</h2>
+        <h2 className={`font-display text-xl ${result.status === "blocked" ? "text-gold" : "text-fg"}`}>{result.status === "existing_experiment" ? text("已有实验", "Existing experiment") : result.status === "blocked" ? text("输入检查未通过，未启动搜索", "Input checks blocked; search not started") : text("必要输入具备，尚未通过评估", "Necessary inputs present; evaluation pending")}</h2>
         {result.target?.evidence?.loop_id && <Link href={`/evolution/loops/${result.target.evidence.loop_id}`}>{text("继续查看已有实验", "Continue existing experiment")}</Link>}
         {result.blocker_codes?.includes("EVENT_SNAPSHOT_EMPTY") && <p>{text("当前标的在截止时点没有可见事件；需继续真实采集后准备新实验。", "No visible events for this asset at the cutoff. Collect real evidence before preparing a new experiment.")}</p>}
         {result.blocker_codes?.some(code => code.startsWith("EVOLUTION_DATA_")) && <p>{text("行情窗口尚不可用：请核对连续闭合行情、数据新鲜度及最多 10,000 根限制。", "The bar window is unavailable: check continuity, freshness and the 10,000-bar limit.")}</p>}
+        <EventQualityNotice quality={result.event_quality} zh={zh} />
         {result.target?.evidence?.seed_label && <p className="max-w-3xl leading-relaxed text-fg-muted">{result.target.evidence.seed_label}</p>}
         {result.config && <p className="font-mono text-sm text-cyan">{result.config.symbol} · {result.config.timeframe}</p>}
         {result.selection_start && <p className="break-words font-mono text-xs text-fg-muted">{text("选择段", "Selection window")}: {date(result.selection_start)} — {date(result.selection_end)}</p>}

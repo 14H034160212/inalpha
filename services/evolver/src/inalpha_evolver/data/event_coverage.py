@@ -5,6 +5,7 @@ from typing import Any
 
 from inalpha_paper.model.market_events import MarketEvent
 
+from .event_quality import inspect_event_quality
 from .manifest import FrozenDataset
 from .partitions import event_partition_ends
 
@@ -13,6 +14,8 @@ def inspect_event_coverage(
     dataset: FrozenDataset,
     events: list[MarketEvent],
     asset: str,
+    *,
+    facts: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Bound possible selection evidence without reading returns or sealed holdout outcomes.
 
@@ -45,10 +48,20 @@ def inspect_event_coverage(
     upper_bound = sum(counts.values())
     # matched-events-v1 requires at least eight pairs; no candidate can pair more
     # events than this deliberately permissive bound on the selection input.
-    blocked = upper_bound < 8
+    discovery_cutoff = bars[discovery_end - 1].bar_known_at if discovery_end else None
+    quality = inspect_event_quality(
+        [event for event in events
+         if end is not None and event.available_at <= end
+         and ((discovery_cutoff is not None and event.available_at <= discovery_cutoff)
+              or not event.assets or asset.upper() in event.assets)],
+        facts,
+    )
+    blockers = (["E2_INPUT_COVERAGE_INSUFFICIENT"] if upper_bound < 8 else []) + quality["blocker_codes"]
+    blocked = bool(blockers)
     return {
         "status": "blocked" if blocked else "necessary_inputs_present",
-        "blocker_codes": ["E2_INPUT_COVERAGE_INSUFFICIENT"] if blocked else [],
+        "blocker_codes": blockers,
+        "event_quality": quality,
         "dataset_content_sha256": dataset.manifest.content_sha256,
         "bar_count": len(bars),
         "partition_bar_counts": {"discovery": len(bars[:discovery_end]),
@@ -63,7 +76,9 @@ def inspect_event_coverage(
         "matched_controls": "not_evaluated",
         "fdr": "not_evaluated",
         "holdout": "not_evaluated",
-        "next_action": "collect_real_evidence_for_a_new_explicit_experiment"
+        "next_action": "review_provenance_and_prepare_new_evidence"
+        if quality["blocker_codes"]
+        else "collect_real_evidence_for_a_new_explicit_experiment"
         if blocked
         else "evaluate_candidates",
     }

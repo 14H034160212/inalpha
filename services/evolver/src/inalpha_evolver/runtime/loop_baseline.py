@@ -119,10 +119,12 @@ async def require_loop_event_coverage(
         decode_frozen_dataset(persisted),
         [market_event_from_fact(fact) for fact in snapshot["facts"]],
         body.config.event_asset_code,
+        facts=snapshot["facts"],
     )
     if coverage["status"] == "blocked":
         raise ValidationError(
-            "selection event coverage cannot meet the minimum matched-pair requirement",
+            "event inputs blocked: " + ", ".join(coverage["blocker_codes"])
+            + "; review provenance and coverage before model access",
             details=coverage,
-            code="E2_INPUT_COVERAGE_INSUFFICIENT",
+            code=coverage["blocker_codes"][0],
         )

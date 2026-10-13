@@ -41,9 +41,15 @@ def event(data, index, kind="other", asset="BTC"):
     return MarketEvent(str(index) + kind, kind, (asset,), "", 1, 1, instant, instant)
 
 
+def coverage(data, events, asset):
+    """Numerical-bound fixtures explicitly use corrected, known provenance."""
+    facts = [{"fact_id": value.event_id, "extractor_version": "deterministic-event-extractor-v3"} for value in events]
+    return inspect_event_coverage(data, events, asset, facts=facts)
+
+
 def test_nonempty_snapshot_outside_selection_is_blocked():
     data = dataset()
-    result = inspect_event_coverage(data, [event(data, 100), event(data, 1100)], "BTC")
+    result = coverage(data, [event(data, 100), event(data, 1100)], "BTC")
     assert result["status"] == "blocked"
     assert result["selection_fact_count"] == 0
     assert result["blocker_codes"] == ["E2_INPUT_COVERAGE_INSUFFICIENT"]
@@ -51,7 +57,7 @@ def test_nonempty_snapshot_outside_selection_is_blocked():
 
 def test_versions_same_type_within_day_do_not_fill_eight_pairs():
     data = dataset()
-    result = inspect_event_coverage(data, [event(data, i) for i in range(730, 750)], "BTC")
+    result = coverage(data, [event(data, i) for i in range(730, 750)], "BTC")
     assert result["selection_fact_count"] == 20
     assert result["independent_event_upper_bound"] == 1
     assert result["status"] == "blocked"
@@ -59,7 +65,7 @@ def test_versions_same_type_within_day_do_not_fill_eight_pairs():
 
 def test_other_supported_and_exact_day_boundary_count_without_pass_claim():
     data = dataset()
-    result = inspect_event_coverage(data, [event(data, 730 + 24 * i) for i in range(8)], "BTC")
+    result = coverage(data, [event(data, 730 + 24 * i) for i in range(8)], "BTC")
     assert result["independent_event_upper_bound"] == 8
     assert result["status"] == "necessary_inputs_present"
     assert result["matched_controls"] == "not_evaluated"
@@ -70,12 +76,12 @@ def test_foreign_asset_and_holdout_do_not_supply_selection_evidence():
     data = dataset()
     events = [event(data, 730 + 24 * i, asset="SOL") for i in range(8)]
     events += [event(data, 1000 + i) for i in range(10)]
-    assert inspect_event_coverage(data, events, "BTC")["selection_fact_count"] == 0
+    assert coverage(data, events, "BTC")["selection_fact_count"] == 0
 
 
 def test_types_have_separate_independence_clusters():
     data = dataset()
-    result = inspect_event_coverage(
+    result = coverage(
         data, [event(data, 730, "upgrade"), event(data, 731, "other")], "BTC"
     )
     assert result["independent_event_upper_bound"] == 2
@@ -83,7 +89,7 @@ def test_types_have_separate_independence_clusters():
 
 def test_selection_edges_are_permissive_upper_bound_not_execution_claim():
     data = dataset()
-    result = inspect_event_coverage(data, [event(data, i) for i in (719, 720, 959, 960)], "BTC")
+    result = coverage(data, [event(data, i) for i in (719, 720, 959, 960)], "BTC")
     assert result["selection_fact_count"] == 2
 
 
