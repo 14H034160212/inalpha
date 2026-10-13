@@ -25,19 +25,19 @@
       "reason": "Missing quality contract"
     },
     "targeted_python_initial": 44,
-    "final_quality_tests": 7,
+    "final_quality_tests": 9,
     "full_evolver_isolated_database": {
-      "tests": 354,
-      "passed": 353,
+      "tests": 356,
+      "passed": 355,
       "skipped": 1,
       "failures": 0,
       "errors": 0,
       "migration": "Fresh wallet0058 -> diagnostics0059 -> 0068",
       "database_retained": true,
-      "duration_seconds": 116.921,
+      "duration_seconds": 240.556,
       "scope": "Existing full automated suite in isolated database; not complete-service fault injection or real-owner paid execution"
     },
-    "dashboard_tests": 207,
+    "dashboard_tests": 208,
     "orchestration_related_tests": 12,
     "dashboard_typecheck": "passed",
     "orchestration_typecheck": "passed",
@@ -49,7 +49,20 @@
       "failed": 0,
       "existing_warnings": 12
     },
-    "independent_review": "Found discovery-context lower-bound bypass, corrected and regression added; subsequent four-call-site/credential-order review found no new blocker"
+    "independent_review": "Found discovery-context lower-bound bypass, corrected and regression added; subsequent four-call-site/credential-order review found no new blocker",
+    "intermittent_full_suite_failure": {
+      "failed_test": "test_five_generations_reject_insufficient_evidence_with_real_engine[False]",
+      "observed": "One full run had candidate outcomes failing the success assertion; 354 passed, 1 failed, 1 skipped",
+      "standalone_reproduction": "Same code and retained isolated database: passed without changing engine/test timeouts",
+      "subsequent_full_suite": "355 passed, 1 skipped; fresh correctly migrated database",
+      "cause": "Not established; do not infer resource-limit warnings caused this failure",
+      "audit_databases_retained": true
+    },
+    "review_corrections": [
+      "Nonempty events with omitted facts fail closed as missing provenance",
+      "Standalone Campaign checks coverage and provenance before credential access",
+      "UI explicit blocker codes override an unexpected status"
+    ]
   },
   "production_observation": {
     "research_image": "4441cb07297aaa89e719bf7f164e7792084cfd3e",
