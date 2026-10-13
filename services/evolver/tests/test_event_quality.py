@@ -73,8 +73,8 @@ def test_insufficient_coverage_and_legacy_quality_are_both_explained():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("legacy", [True, False])
-async def test_campaign_stops_before_credential_access_for_blocked_inputs(monkeypatch, legacy):
+@pytest.mark.parametrize("legacy,count", [(True, 8), (False, 1), (True, 1)])
+async def test_campaign_stops_before_credential_access_for_blocked_inputs(monkeypatch, legacy, count):
     from datetime import UTC, datetime
     from types import SimpleNamespace
     from unittest.mock import AsyncMock
@@ -84,7 +84,7 @@ async def test_campaign_stops_before_credential_access_for_blocked_inputs(monkey
     from inalpha_evolver.runtime import campaign
 
     data = dataset()
-    events = [event(data, 730 + 24 * i, "regulatory") for i in range(8 if legacy else 1)]
+    events = [event(data, 730 + 24 * i, "regulatory") for i in range(count)]
     facts = [
         {
             "fact_id": value.event_id,
@@ -111,8 +111,12 @@ async def test_campaign_stops_before_credential_access_for_blocked_inputs(monkey
     with pytest.raises(ValidationError) as raised:
         await campaign.execute_campaign({"status": "running"}, SimpleNamespace())
     assert raised.value.code == (
-        "E2_EVENT_QUALITY_REVIEW_REQUIRED" if legacy else "E2_INPUT_COVERAGE_INSUFFICIENT"
+        "E2_EVENT_QUALITY_REVIEW_REQUIRED" if legacy and count == 8 else "E2_INPUT_COVERAGE_INSUFFICIENT"
     )
+    if legacy:
+        assert "E2_EVENT_QUALITY_REVIEW_REQUIRED" in raised.value.message
+    if count < 8:
+        assert "E2_INPUT_COVERAGE_INSUFFICIENT" in raised.value.message
     credentials.assert_not_awaited()
     scope.assert_not_awaited()
 

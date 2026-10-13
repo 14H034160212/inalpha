@@ -74,7 +74,8 @@ async def execute_campaign(campaign: dict[str, Any], settings: EvolverSettings) 
         config.event_asset_code, facts=snapshot["facts"],
     )
     if coverage["status"] == "blocked":
-        raise ValidationError("event inputs require coverage or provenance review before model access",
+        raise ValidationError("event inputs blocked: " + ", ".join(coverage["blocker_codes"])
+                              + "; review provenance and coverage before model access",
                               details=coverage, code=coverage["blocker_codes"][0])
     loop_scope = await campaign_model_scope(campaign)
     mutator = (

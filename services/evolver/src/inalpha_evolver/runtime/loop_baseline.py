@@ -123,7 +123,8 @@ async def require_loop_event_coverage(
     )
     if coverage["status"] == "blocked":
         raise ValidationError(
-            "event inputs require additional coverage or provenance review",
+            "event inputs blocked: " + ", ".join(coverage["blocker_codes"])
+            + "; review provenance and coverage before model access",
             details=coverage,
             code=coverage["blocker_codes"][0],
         )
