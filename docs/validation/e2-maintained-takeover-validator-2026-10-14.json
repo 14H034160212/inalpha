@@ -1,0 +1,209 @@
+{
+  "database": "inalpha_container_audit_a891ed653b0a4fcc9e8dddd31de5e225",
+  "result": "passed",
+  "scope": "full actual Evolver application lifespan and dispatchers; provider SDK HTTP transport replaced, synthetic local signer/Dashboard/Data; actual fixed business image, local AMD64 emulation, not real owner/production",
+  "initial_health": {
+    "status": "ok",
+    "service": "inalpha-evolver",
+    "event_evolution": "enabled"
+  },
+  "sigstop_completed_at": "2026-10-14T08:36:33.618504+00:00",
+  "fault": "SIGSTOP old application; wait natural lease expiry; second application claims",
+  "before": {
+    "status": "replaying",
+    "active_generation": 1,
+    "lease_token": "01b2e32e-e00e-4328-bf34-9e8e2ae8f361",
+    "lease_expires_at": "2026-10-14 08:37:01.562946+00:00",
+    "locked_candidate_id": null,
+    "forward_sandbox_id": null,
+    "holdout_consumed_at": null,
+    "failure_code": null,
+    "observed_at": "2026-10-14 08:36:33.623580+00:00",
+    "proposal_count": 0,
+    "stored_response_count": 0,
+    "response_count": 2,
+    "succeeded": 0,
+    "ledger": {
+      "spent_usd": "0",
+      "reserved_usd": "0.0340608",
+      "max_cost_usd": "1",
+      "attempts": 2
+    },
+    "expired": false
+  },
+  "expired_lease_observation": {
+    "status": "replaying",
+    "active_generation": 1,
+    "lease_token": "01b2e32e-e00e-4328-bf34-9e8e2ae8f361",
+    "lease_expires_at": "2026-10-14 08:37:01.562946+00:00",
+    "locked_candidate_id": null,
+    "forward_sandbox_id": null,
+    "holdout_consumed_at": null,
+    "failure_code": null,
+    "observed_at": "2026-10-14 08:37:01.890314+00:00",
+    "proposal_count": 0,
+    "stored_response_count": 0,
+    "response_count": 2,
+    "succeeded": 0,
+    "ledger": {
+      "spent_usd": "0",
+      "reserved_usd": "0.0340608",
+      "max_cost_usd": "1",
+      "attempts": 2
+    },
+    "expired": true
+  },
+  "second_application_started_at": "2026-10-14T08:37:01.911612+00:00",
+  "restart_health": {
+    "status": "ok",
+    "service": "inalpha-evolver",
+    "event_evolution": "enabled"
+  },
+  "second_application_claim": {
+    "status": "replaying",
+    "lease_token": "7475e1e6-49cf-4730-9734-40fa0a96a0f7",
+    "lease_expires_at": "2026-10-14 08:37:45.614037+00:00",
+    "updated_at": "2026-10-14 08:37:15.614044+00:00",
+    "observed_at": "2026-10-14 08:37:15.948605+00:00"
+  },
+  "direct_stale_write": {
+    "result": "rejected",
+    "code": "LOOP_AUTHORIZATION_UNAVAILABLE",
+    "operation": "proposal_responses.complete",
+    "active_lease_at_attempt": {
+      "status": "replaying",
+      "lease_token": "7475e1e6-49cf-4730-9734-40fa0a96a0f7",
+      "lease_expires_at": "2026-10-14 08:37:45.614037+00:00",
+      "observed_at": "2026-10-14 08:37:19.070242+00:00"
+    },
+    "scope": "direct same-image storage write attempt, not an old SDK callback"
+  },
+  "after": {
+    "status": "failed",
+    "active_generation": 1,
+    "lease_token": null,
+    "lease_expires_at": null,
+    "locked_candidate_id": null,
+    "forward_sandbox_id": null,
+    "holdout_consumed_at": null,
+    "failure_code": "LOOP_PROPOSAL_RESPONSE_UNCONFIRMED",
+    "observed_at": "2026-10-14 08:37:19.795621+00:00",
+    "proposal_count": 0,
+    "stored_response_count": 0,
+    "response_count": 2,
+    "succeeded": 0,
+    "ledger": {
+      "spent_usd": "0",
+      "reserved_usd": "0.0340608",
+      "max_cost_usd": "1",
+      "attempts": 2
+    },
+    "expired": null
+  },
+  "offline_provider_calls": [
+    "before",
+    "before"
+  ],
+  "local_peripheral_requests": [
+    "snapshot",
+    "local-fixture-grant",
+    "credential",
+    "snapshot",
+    "local-fixture-grant",
+    "credential"
+  ],
+  "old_application_resumed_and_fixture_released_at": "2026-10-14T08:37:19.917544+00:00",
+  "after_old_worker_return": {
+    "status": "failed",
+    "active_generation": 1,
+    "lease_token": null,
+    "lease_expires_at": null,
+    "locked_candidate_id": null,
+    "forward_sandbox_id": null,
+    "holdout_consumed_at": null,
+    "failure_code": "LOOP_PROPOSAL_RESPONSE_UNCONFIRMED",
+    "observed_at": "2026-10-14 08:37:39.842318+00:00",
+    "proposal_count": 0,
+    "stored_response_count": 0,
+    "response_count": 2,
+    "succeeded": 0,
+    "ledger": {
+      "spent_usd": "0",
+      "reserved_usd": "0.0340608",
+      "max_cost_usd": "1",
+      "attempts": 2
+    },
+    "expired": null
+  },
+  "late_response_observation_seconds": 20,
+  "purpose": "Observe takeover/resume invariance and direct old-token checkpoint write rejection; not successful old SDK receipt or full fencing acceptance",
+  "cleanup_errors": [],
+  "observer_transient_failures": [],
+  "old_worker_cleanup": {
+    "exit_code": 0,
+    "errors": []
+  },
+  "new_worker_cleanup": {
+    "exit_code": 0,
+    "errors": []
+  },
+  "env_file_removed": true,
+  "owned_container_removed": true,
+  "image": "ghcr.io/mirror29/inalpha-evolver:a275f8be7679578e4aef62cffb3ff5c6f13a988e",
+  "actual_image_id": "sha256:5aadcaf79089ece40137a11ad39085c3f190b2eff645219e9c9324e19e5be7df",
+  "runtime": "local Docker AMD64 emulation on ARM host; CPUs2/memory4GB; no production container restarted",
+  "entrypoint_shim_sha256": "e025efe7315ee9c80196bad678673aba78b10b4a80a13698dd264be182202b90",
+  "harness_commit": "f2b768fe",
+  "business_sha": "a275f8be7679578e4aef62cffb3ff5c6f13a988e",
+  "new_production_model_calls": 0,
+  "production_e2_searches_started": 0,
+  "harness_files_sha256": {
+    "services/evolver/scripts/validate_campaign_takeover.py": "94feedae0d1320e5902ec6e02ef69a5241ef0664869e58cb517cd54111850abd",
+    "services/evolver/scripts/takeover_fixture/app.py": "e025efe7315ee9c80196bad678673aba78b10b4a80a13698dd264be182202b90",
+    "services/evolver/scripts/takeover_fixture/seed.py": "7c8fe7002efdb4d702298b8472b365b5f4683106c25f472e86fabab8347e59c6",
+    "services/evolver/scripts/takeover_fixture/stale_write.py": "58d6aca522353f310fee342f4ec8f732def09c53a92ec148f64851f8058bb845"
+  },
+  "acceptance_limits": [
+    "Direct complete() invocation runs inside the actual business image while a different current lease is live. This proves the observed storage-call rejection, not successful receipt by an old SDK callback.",
+    "Full Evolver lifespan and dispatchers with offline peripheral HTTP/provider fixtures, local AMD64 emulation on an ARM host. Not full peripheral service stack, normal-owner authorization, production recovery, strategy improvement or supplier billing.",
+    "Audit databases retained; only owned UUID containers and private temporary environment files removed.",
+    "Correct fresh migration chain through 0069; no legacy audit database upgrade or force stamp."
+  ],
+  "local_validation": {
+    "boundary_and_cleanup_tests": 7,
+    "ruff": "passed",
+    "ruff_format": "passed",
+    "consistency": {
+      "passed": 19,
+      "failed": 0,
+      "existing_warnings": 12
+    }
+  },
+  "development_attempts": [
+    {
+      "database": "inalpha_container_audit_df417ccdcaca4dbbbc67c76d506bf52e",
+      "result": "failed",
+      "cause": "Fixture directory bind conflicted with writable exchange child mount; no app startup."
+    },
+    {
+      "database": "inalpha_container_audit_9101162e638447edb2b60247d5594f33",
+      "result": "failed",
+      "cause": "Same fixture directory bind conflict; no app startup."
+    },
+    {
+      "database": "inalpha_container_audit_1b3ded83010b44798fa9d94454888349",
+      "result": "failed",
+      "cause": "Observer closure used global instead of nonlocal after conversion to main; startup passed, observation failed."
+    },
+    {
+      "database": "inalpha_container_audit_5f91711d698a473ab6ab202e0580d43f",
+      "result": "passed",
+      "scope": "Intermediate direct stale write probe before cleanup robustness revision."
+    },
+    {
+      "database": "inalpha_container_audit_1bcfcca48d54466db4df125f25b20687",
+      "result": "passed",
+      "scope": "Cleanup revision probe before supported event-type fixture alignment."
+    }
+  ]
+}
