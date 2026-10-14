@@ -97,6 +97,16 @@ async def correct_fact(
             or source["extractor_version"] != "deterministic-event-extractor-v2"
         ):
             raise _conflict("source is not an active legacy regulatory fact")
+        if not request.value.retracted:
+            await cur.execute(
+                "SELECT event_id FROM raw_market_events WHERE source=%s AND source_event_id=%s ORDER BY version DESC LIMIT 1",
+                (source["source"], source["source_event_id"]),
+            )
+            latest_raw = await cur.fetchone()
+            if latest_raw is None or latest_raw["event_id"] != source["raw_event_id"]:
+                raise _conflict(
+                    "new raw evidence exists; review the latest extraction or explicitly retire the obsolete classification"
+                )
         await cur.execute("SELECT clock_timestamp() AS available_at")
         clock = await cur.fetchone()
         assert clock is not None

@@ -288,6 +288,45 @@ async def test_same_classification_review_appends_one_version_without_retirement
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("db_pool")
+async def test_pending_new_raw_evidence_prevents_revalidating_stale_fact():
+    async with get_conn() as conn:
+        source = await seed(conn)
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "SELECT source,source_event_id,first_seen_at FROM raw_market_events WHERE event_id=%s",
+                (source["raw_event_id"],),
+            )
+            raw = await cur.fetchone()
+        now = datetime.now(UTC)
+        await ingest_raw_event(
+            conn,
+            RawEventIngestRequest(
+                source=raw["source"],
+                source_event_id=raw["source_event_id"],
+                title="Bitcoin bank lawsuit update",
+                first_seen_at=raw["first_seen_at"],
+                fetched_at=now,
+                accepted_at=now,
+                collector_version="test",
+                policy_version="first-seen-only-v1",
+                source_tier="official",
+            ),
+        )
+        with pytest.raises(ConflictError):
+            await fact_corrections.correct_fact(
+                conn, source["fact_id"], review(source), service_subject="service:research"
+            )
+        _, retired, created = await fact_corrections.correct_fact(
+            conn,
+            source["fact_id"],
+            review(source, retracted=True),
+            service_subject="service:research",
+        )
+        assert created and retired["retracted"]
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("db_pool")
 async def test_existing_replacement_requires_explicit_retirement_without_overwriting():
     async with get_conn() as conn:
         source = await seed(conn)
