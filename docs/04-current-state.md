@@ -91,6 +91,9 @@ PR #219（业务 `ab5fd15b`）的本地测试边界：Evolver 335 通过 / 1 跳
 
 ### P0 · 可靠性与真实五代搜索
 
+- 2026-10-14新增同业务镜像完整Evolver容器探索：AMD64正式镜像在ARM本机模拟运行，完整lifespan/dispatcher在2响应保存、0提案处SIGKILL（exit137），自然租约过期后重启完成五代/120实现，离线调用2+8、合成已知账本0.000780/预留0。最终FDR不足，无冠军。SDK transport和外围HTTP均为夹具，脚本尚非CI维护套件；不是完整外围服务栈或正常owner生产恢复。前两次连接适配失败与一次观察端超时部分回执保留；不删除审计库。见 [同镜像已知响应恢复](validation/e2-same-image-response-recovery-2026-10-14.json)。
+- 同日同镜像在途未知响应检查：两次离线请求进入provider后强杀，响应尚未保存；重启后明确`LOOP_PROPOSAL_RESPONSE_UNCONFIRMED`，再重启仍为同一失败结果。调用总数2，已知支出0、未知预留0.0340608保持，额度1充足却未再次进入provider；不是请求未计费的证明。两项成功检查最终TERM exit0，独立确认拥有的临时容器已清理。见 [同镜像未知响应阻断](validation/e2-same-image-unknown-response-2026-10-14.json)。
+
 - 2026-10-14 完整应用发现并修复实际阻断：campaign持久化了发起用户，但调度投影漏`requested_by_sub`，真实模型使用路径报费用身份缺失。`ae9626db`补回内部字段，公开响应schema仍不暴露；新数据库回归修复前1失败、修复后1通过。完整Evolver新隔离数据库357通过/1跳过，相关Ruff通过；针对改动文件Mypy10项tuple/dict错误与main影子源码输出完全相同，不能说类型检查通过。修复已随 [PR #242](https://github.com/mirror29/inalpha/pull/242) 合并为`a275f8be`；精确head/main CI与七镜像全成功，评审/合并tree相同。自动CR有1项MEDIUM，已按完整消费者源码回应，独立专项复核无确认新增P1/P2，不说自动CR零发现。发布守卫先0后2、后续1/2均中止；稳定空闲观察也未取得连续三个0，原Evolver容器未替换，现场内部投影仍缺字段。配置/数据库备份600、TOC可读但非恢复演练；只更新了服务器仓库并缓存镜像，不能说生产执行已修好。Chrome解锁后已关闭本任务新建验收页，保留其他标签，连接仍未稳定归零。新镜像无网络临时容器的实际模块导入确认内部字段存在、公开schema不包含它，源码哈希与业务版本相同；不是应用lifespan或生产执行验收。待自然连接空闲后仅发布Evolver，精确旧image ID回滚。见 [发布与守卫回执](validation/e2-campaign-identity-release-2026-10-14.json)。
 - 同日完整 Evolver lifespan/dispatcher 源码进程隔离探索通过：新正确迁移链库中，离线模型返回且2条响应checkpoint保存、整代提案0时SIGKILL，租约自然过期后重启完成五代/120实现；离线调用2+8，总10而非12，合成账本0.000780、未知预留0、10attempts。最终`INSUFFICIENT_FDR_EVIDENCE`，无冠军/Forward/holdout。外围签发器、凭据端点、事件快照和provider HTTP transport均是本地夹具；不是同镜像、真实owner、完整外围服务栈或生产恢复。此临时进程脚本尚非维护中的CI回归，早先两次启动失败也保留。见 [完整应用恢复回执](validation/e2-full-app-response-recovery-2026-10-14.json)。
 
