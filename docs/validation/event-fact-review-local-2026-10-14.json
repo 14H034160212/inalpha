@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-14",
+  "code_commit": "b7a247b1",
+  "scope": "trusted Research preview/apply caller for prospective Data legacy corrections; no production deployment or historical writes",
+  "authorization": "existing event_extract_request service authority at Research; existing event_extract at Data; ordinary owner rejected",
+  "workflow": [
+    "exact source fact/hash and exact archived raw identity",
+    "deterministic v3 classification preserving assets/action/actor/evidence",
+    "dry_run preview does not write",
+    "apply recomputes preview digest including operation/caller/reason/retraction and classification",
+    "Data serializes exact latest source and atomic retirement/replacement audit",
+    "complete linked audit/fact acknowledgement required; unknown responses are not automatically resent"
+  ],
+  "validation": {
+    "research_related_tests": 52,
+    "research_non_integration": {
+      "passed": 257,
+      "skipped": 3,
+      "deselected": 4,
+      "skipped_reason": "dedicated ledger DB not configured",
+      "excluded": "network/integration tests"
+    },
+    "data_isolated_tests": 33,
+    "data_retained_audit_database": "inalpha_fact_corrections_ad52553b612d4a76897a1119d2367b82",
+    "recorded_audit_downgrade_rejected": true,
+    "mypy": "four Research changed source files and Data route/correction module passed; remaining storage baseline errors documented separately",
+    "ruff": "changed sources/tests passed",
+    "consistency": {
+      "passed": 19,
+      "failed": 0,
+      "existing_warnings": 12
+    },
+    "review": "P2 incomplete acknowledgement parsing fixed; incremental independent static review no new confirmed P1/P2; test fixtures summary only"
+  },
+  "limits": [
+    "Route and database tests are not complete isolated-service or production review acceptance",
+    "No automatic bulk correction and no production writes",
+    "No historical availability backdating; frozen old experiments unchanged",
+    "v3 rule output is not universal semantic certification, independent matched-pair coverage or FDR approval",
+    "No new model calls; historical unknown charges remain unknown",
+    "Schema0069 not deployed; production remains latest recorded business versions/schema0068"
+  ]
+}
