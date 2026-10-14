@@ -91,7 +91,7 @@ PR #219（业务 `ab5fd15b`）的本地测试边界：Evolver 335 通过 / 1 跳
 
 ### P0 · 可靠性与真实五代搜索
 
-- 2026-10-14 完整应用发现并修复实际阻断：campaign持久化了发起用户，但调度投影漏`requested_by_sub`，真实模型使用路径报费用身份缺失。`ae9626db`补回内部字段，公开响应schema仍不暴露；新数据库回归修复前1失败、修复后1通过。完整Evolver新隔离数据库357通过/1跳过，相关Ruff通过；针对改动文件Mypy10项tuple/dict错误与main影子源码输出完全相同，不能说类型检查通过。修复尚未部署，不称生产执行已修好。
+- 2026-10-14 完整应用发现并修复实际阻断：campaign持久化了发起用户，但调度投影漏`requested_by_sub`，真实模型使用路径报费用身份缺失。`ae9626db`补回内部字段，公开响应schema仍不暴露；新数据库回归修复前1失败、修复后1通过。完整Evolver新隔离数据库357通过/1跳过，相关Ruff通过；针对改动文件Mypy10项tuple/dict错误与main影子源码输出完全相同，不能说类型检查通过。修复已随 [PR #242](https://github.com/mirror29/inalpha/pull/242) 合并为`a275f8be`；精确head/main CI与七镜像全成功，评审/合并tree相同。自动CR有1项MEDIUM，已按完整消费者源码回应，独立专项复核无确认新增P1/P2，不说自动CR零发现。发布守卫先0后2、后续1/2均中止；稳定空闲观察也未取得连续三个0，原Evolver容器未替换，现场内部投影仍缺字段。配置/数据库备份600、TOC可读但非恢复演练；只更新了服务器仓库并缓存镜像，不能说生产执行已修好。待自然连接空闲后仅发布Evolver，精确旧image ID回滚。见 [发布与守卫回执](validation/e2-campaign-identity-release-2026-10-14.json)。
 - 同日完整 Evolver lifespan/dispatcher 源码进程隔离探索通过：新正确迁移链库中，离线模型返回且2条响应checkpoint保存、整代提案0时SIGKILL，租约自然过期后重启完成五代/120实现；离线调用2+8，总10而非12，合成账本0.000780、未知预留0、10attempts。最终`INSUFFICIENT_FDR_EVIDENCE`，无冠军/Forward/holdout。外围签发器、凭据端点、事件快照和provider HTTP transport均是本地夹具；不是同镜像、真实owner、完整外围服务栈或生产恢复。此临时进程脚本尚非维护中的CI回归，早先两次启动失败也保留。见 [完整应用恢复回执](validation/e2-full-app-response-recovery-2026-10-14.json)。
 
 - 已有自动化和隔离数据库的租约、幂等、审批恢复、交接测试。完整服务进程退出、在途模型请求、显式失败重试、旧 worker 隔离仍需独立服务验收；数据库对象重建不等于生产重启通过。
