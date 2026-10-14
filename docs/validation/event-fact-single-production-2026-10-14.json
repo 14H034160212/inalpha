@@ -261,7 +261,7 @@
   "availability_generated_by_database_after_original": true,
   "original_v2_versions_preserved": 375,
   "observed_v3_versions_after": 38,
-  "version_count_caveat": "Includes continuing normal extraction and the two correction versions; not independent evaluable events.",
+  "version_count_caveat": "Initial deployment observation: 35 v3 versions. One subsequent completed normal extraction added 1 version, and the single cross-class correction atomically appended 1 retired version plus 1 replacement version, yielding 38. The explicit replay appended 0. These are fact versions, not correction operation counts or independent evaluable events.",
   "saved_review_request_mode": "600",
   "service_container_ids_unchanged_during_acceptance": true,
   "loops": 0,
@@ -275,5 +275,22 @@
     "Only the explicitly inspected SoFiUSD article was prospectively corrected; all other previewed records remain unmodified.",
     "Chrome old page AX remained stale after free-check click; refresh showed blank content. No current coverage result or product failure conclusion obtained.",
     "No paid E2 search, champion, Forward, holdout or adoption started."
-  ]
+  ],
+  "version_count_reconciliation": [
+    {
+      "cutoff": "2026-10-14T03:05:55.098265+00:00",
+      "v3_count_at_cutoff": 38,
+      "this_operation_retirement_versions": 1,
+      "this_operation_replacement_versions": 1,
+      "other_v3_versions": 36
+    },
+    {
+      "normal_fact_id": "697872c9-f3c3-4ffe-b640-77699fd3fc5a",
+      "source": "cointelegraph",
+      "extractor_version": "deterministic-event-extractor-v3",
+      "created_at": "2026-10-14T02:31:07.616934+00:00",
+      "extraction_completed": true
+    }
+  ],
+  "observation_scope": "Initial single-correction evidence before the two later BTC confirmations documented separately in event-fact-btc-confirmation-2026-10-14.json."
 }

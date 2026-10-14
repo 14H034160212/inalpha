@@ -89,8 +89,7 @@
     }
   ],
   "all_assets_latest_bar_open_and_required": "2026-10-14T02:00:00Z",
-  "all_assets_reported_freshness_lag_seconds": 0,
-  "freshness_caveat": "Difference from expected closed final bar is zero; bar closes at 03:00 and sample is 14m24.850s later, not zero wall-clock age. Continuous bars were reported by normal preparation, not independently re-audited here.",
+  "freshness_caveat": "UI reports zero difference from the required closed final bar opening timestamp, not wall-clock age. bars[-1].ts is 02:00, 4464.850 seconds before sampled_at; this 1h bar closes at 03:00, 864.850 seconds before sampled_at. Continuous bars were reported by normal preparation, not independently re-audited here.",
   "selection": "No asset selected: all independent upper bounds below 8; BTC also blocked by legacy quality. No comparison of returns or alternate windows to obtain eligibility.",
   "english_preparation": {
     "url": "https://dashboard.inalpha.dev/evolution/prepare?targetKind=paper_runner&targetId=7c09cdb0-cd8a-43b6-8e66-787eb9f7aaed",
@@ -152,5 +151,8 @@
     "interpretation": "Normal suggested-window cutoff advanced, moving the natural 60/20/20 selection segments. These are different snapshots and release versions, not a controlled coverage regression comparison. Exact per-event contributions to the count difference were not reconciled.",
     "guard_behavior": "Current inspect_event_coverage calculates the raw independent upper bound before adding quality blockers; known legacy risk does not subtract facts from that bound. The quality guard was added after the October 13 matrix release.",
     "event_provenance": "Both recorded contexts contain v2 evidence; different windows, evolving snapshots and guard release must be distinguished."
-  }
+  },
+  "all_assets_lag_vs_required_bar_open_seconds": 0,
+  "all_assets_bar_open_age_at_sample_seconds": 4464.85,
+  "all_assets_bar_close_age_at_sample_seconds": 864.85
 }
