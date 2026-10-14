@@ -6,6 +6,7 @@
   "workflow": [
     "exact source fact/hash and exact archived raw identity",
     "deterministic v3 classification preserving assets/action/actor/evidence",
+    "non-retirement review rejects a newer raw article version even before its extraction; explicit obsolete-key retirement remains allowed",
     "dry_run preview does not write",
     "apply recomputes preview digest including operation/caller/reason/retraction and classification",
     "Data serializes exact latest source and atomic retirement/replacement audit",
@@ -20,8 +21,8 @@
       "skipped_reason": "dedicated ledger DB not configured",
       "excluded": "network/integration tests"
     },
-    "data_isolated_tests": 33,
-    "data_retained_audit_database": "inalpha_fact_corrections_ad52553b612d4a76897a1119d2367b82",
+    "data_isolated_tests": 34,
+    "data_retained_audit_database": "inalpha_fact_corrections_cf96ad7b2e54457ab1a7da7ecdbe4b8a",
     "recorded_audit_downgrade_rejected": true,
     "mypy": "four Research changed source files and Data route/correction module passed; remaining storage baseline errors documented separately",
     "ruff": "changed sources/tests passed",
@@ -43,7 +44,7 @@
       "fact_versions": 3,
       "research_restart_same_fact": true,
       "owner_rejected": true,
-      "retained_audit_database": "inalpha_review_process_a1e95ccd4a6e4a7395873006c7786ad1",
+      "retained_audit_database": "inalpha_review_process_e2f084f54f4f40d6bc866779e10c5206",
       "cleanup": "only these owned subprocesses stopped; audit database retained",
       "limits": "temporary exploratory script; synthetic local platform service authority; source apps not reviewed production images; not production or E2 model restart validation"
     }
@@ -55,5 +56,18 @@
     "v3 rule output is not universal semantic certification, independent matched-pair coverage or FDR approval",
     "No new model calls; historical unknown charges remain unknown",
     "Schema0069 not deployed; production remains latest recorded business versions/schema0068"
-  ]
+  ],
+  "latest_data_fix_commit": "de02e2f76ef7cddf05a585dbe1254ad9274c7c35",
+  "delivery": {
+    "pull_request": "https://github.com/mirror29/inalpha/pull/238",
+    "status": "latest source/doc head pending CI and review; not merged or deployed",
+    "production_read_only_check": {
+      "database": "inalpha",
+      "schema": "0068",
+      "leased_extraction_jobs": 0,
+      "repo": "76727f6d7a77d3015d6e9a604e11874b3caf3b0d",
+      "Data": "ee655f39 healthy",
+      "Research": "4441cb07 healthy"
+    }
+  }
 }
