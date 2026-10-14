@@ -6,7 +6,7 @@ from uuid import uuid4
 
 import pytest
 from inalpha_shared.db import get_conn
-from inalpha_shared.errors import ConflictError
+from inalpha_shared.errors import ConflictError, InalphaError
 from pydantic import ValidationError
 
 from inalpha_data.event_models import (
@@ -194,6 +194,36 @@ async def test_review_failure_rolls_back_both_fact_and_audit(monkeypatch, fail_a
             conn, source["fact_id"], request, service_subject="service:research"
         )
         assert created
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("db_pool")
+async def test_unverified_append_aborts_audit_even_under_optimization(monkeypatch):
+    original = fact_corrections.write_fact
+
+    async def unverified_append(*args, **kwargs):
+        fact, _created = await original(*args, **kwargs)
+        return fact, False
+
+    async with get_conn() as conn:
+        source = await seed(conn)
+        monkeypatch.setattr(fact_corrections, "write_fact", unverified_append)
+        with pytest.raises(InalphaError) as caught:
+            await fact_corrections.correct_fact(
+                conn, source["fact_id"], review(source), service_subject="service:research"
+            )
+        assert caught.value.code == "EVENT_FACT_CORRECTION_INVARIANT"
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "SELECT count(*) AS n FROM market_event_facts WHERE raw_event_id=%s",
+                (source["raw_event_id"],),
+            )
+            assert (await cur.fetchone())["n"] == 1
+            await cur.execute(
+                "SELECT count(*) AS n FROM market_event_fact_corrections WHERE source_fact_id=%s",
+                (source["fact_id"],),
+            )
+            assert (await cur.fetchone())["n"] == 0
 
 
 @pytest.mark.integration
@@ -477,7 +507,16 @@ async def test_concurrent_reviews_do_not_append_twice(same_operation):
 
 @pytest.mark.parametrize(
     "mode",
-    ["missing", "owner", "wrong_purpose", "service", "service_conflict", "service_invariant"],
+    [
+        "missing",
+        "owner",
+        "wrong_purpose",
+        "service",
+        "service_conflict",
+        "service_invariant",
+        "service_missing",
+        "service_internal_key",
+    ],
 )
 def test_correction_route_requires_existing_extraction_authority(monkeypatch, mode):
     import time
@@ -558,6 +597,12 @@ def test_correction_route_requires_existing_extraction_authority(monkeypatch, mo
         )
     if mode == "service_invariant":
         mutation.side_effect = ValueError("private fixture invariant detail")
+    if mode == "service_missing":
+        mutation.side_effect = fact_corrections.CorrectionSourceNotFoundError(
+            "source fact not found"
+        )
+    if mode == "service_internal_key":
+        mutation.side_effect = KeyError("private fixture internal column")
     read = AsyncMock(return_value=corrected)
     monkeypatch.setattr(events.store, "get_fact", read)
     # Exercise the real dependency without opening a database or widening owner rights.
@@ -569,7 +614,13 @@ def test_correction_route_requires_existing_extraction_authority(monkeypatch, mo
         )
         exact_read = client.get(f"/api/v1/events/facts/{corrected_id}", headers=headers)
     if mode.startswith("service"):
-        expected = {"service": 200, "service_conflict": 409, "service_invariant": 500}[mode]
+        expected = {
+            "service": 200,
+            "service_conflict": 409,
+            "service_invariant": 500,
+            "service_missing": 404,
+            "service_internal_key": 500,
+        }[mode]
         assert response.status_code == expected
         assert exact_read.status_code == 200
         assert exact_read.json()["fact_id"] == str(corrected_id)
@@ -581,6 +632,9 @@ def test_correction_route_requires_existing_extraction_authority(monkeypatch, mo
         elif mode == "service_invariant":
             assert "private fixture invariant detail" not in response.text
             assert response.json()["code"] == "EVENT_FACT_CORRECTION_INVARIANT"
+        elif mode == "service_internal_key":
+            assert "private fixture internal column" not in response.text
+            assert response.json()["code"] == "INTERNAL_ERROR"
         mutation.assert_awaited_once()
         assert mutation.await_args.kwargs["service_subject"] == "service:test"
     else:

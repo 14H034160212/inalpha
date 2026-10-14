@@ -4,7 +4,7 @@ import hashlib
 from typing import Any
 from uuid import UUID
 
-from inalpha_shared.errors import ConflictError
+from inalpha_shared.errors import ConflictError, InalphaError
 from psycopg import AsyncConnection
 from psycopg.rows import dict_row
 
@@ -13,6 +13,17 @@ from .events import _FACT_COLUMNS, _advisory_lock_key, _canonical_hash, write_fa
 
 _AUDIT_COLUMNS = "correction_id,source_fact_id,corrected_fact_id,retired_fact_id,request_hash,service_subject,reason,available_at"
 _POLICY = "event-fact-correction-v1"
+
+
+class CorrectionSourceNotFoundError(LookupError):
+    """Only the exact missing source query maps to HTTP 404."""
+
+
+def _invariant() -> InalphaError:
+    """Retain audit guards even when Python optimization disables assertions."""
+    return InalphaError(
+        "correction could not preserve stored evidence", code="EVENT_FACT_CORRECTION_INVARIANT"
+    )
 
 
 def _conflict(message: str) -> ConflictError:
@@ -60,7 +71,8 @@ async def correct_fact(
                 (existing["corrected_fact_id"],),
             )
             saved = await cur.fetchone()
-            assert saved is not None
+            if saved is None:
+                raise _invariant()
             return dict(existing), dict(saved), False
         await cur.execute(
             f"SELECT {','.join('f.' + c.strip() for c in _FACT_COLUMNS.split(','))},r.source,r.source_event_id "
@@ -69,7 +81,7 @@ async def correct_fact(
         )
         source = await cur.fetchone()
         if source is None:
-            raise LookupError("source fact not found")
+            raise CorrectionSourceNotFoundError("source fact not found")
         await cur.execute(
             "SELECT pg_advisory_xact_lock(hashtextextended(%s,0))",
             (_advisory_lock_key(source["source"], source["source_event_id"]),),
@@ -109,7 +121,8 @@ async def correct_fact(
                 )
         await cur.execute("SELECT clock_timestamp() AS available_at")
         clock = await cur.fetchone()
-        assert clock is not None
+        if clock is None:
+            raise _invariant()
         available_at = clock["available_at"]
         if source["available_at"] > available_at or source["created_at"] > available_at:
             raise _conflict("source fact is not yet available for review")
@@ -174,7 +187,8 @@ async def correct_fact(
             )
             retired, _ = await write_fact(conn, retirement)
         if request.value.retracted:
-            assert retired is not None
+            if retired is None:
+                raise _invariant()
             fact = retired
         else:
             fact, created = await write_fact(
@@ -188,7 +202,8 @@ async def correct_fact(
                     policy_version=_POLICY,
                 ),
             )
-            assert created
+            if not created:
+                raise _invariant()
         await cur.execute(
             f"INSERT INTO market_event_fact_corrections({_AUDIT_COLUMNS}) VALUES(%s,%s,%s,%s,%s,%s,%s,%s) RETURNING {_AUDIT_COLUMNS}",
             (
@@ -203,5 +218,6 @@ async def correct_fact(
             ),
         )
         audit = await cur.fetchone()
-        assert audit is not None
+        if audit is None:
+            raise _invariant()
     return dict(audit), fact, True

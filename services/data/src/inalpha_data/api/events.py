@@ -42,7 +42,7 @@ from ..service_auth import (
     require_snapshot_read,
 )
 from ..storage import events as store
-from ..storage.fact_corrections import correct_fact
+from ..storage.fact_corrections import CorrectionSourceNotFoundError, correct_fact
 
 router = APIRouter(prefix="/events", tags=["events"])
 
@@ -106,7 +106,7 @@ async def correct_event_fact(
         audit, fact, created = await correct_fact(
             db, fact_id, request, service_subject=identity.subject
         )
-    except LookupError as exc:
+    except CorrectionSourceNotFoundError as exc:
         raise EventRecordNotFoundError("source fact not found") from exc
     except ValueError as exc:
         raise InalphaError(
