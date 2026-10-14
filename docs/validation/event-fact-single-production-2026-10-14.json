@@ -1,0 +1,309 @@
+{
+  "date": "2026-10-14",
+  "status": "single_real_correction_and_explicit_replay_verified_not_complete_E2",
+  "business_commit": "9fdb8b8aa0d49a36eddc344c0955b41e28cd9848",
+  "schema": "0069",
+  "production_target_database": "inalpha",
+  "preview": {
+    "preview_only": true,
+    "count": 31,
+    "type_counts": {
+      "other": 15,
+      "regulatory": 16
+    },
+    "rows": [
+      {
+        "fact_id": "8a0ef52e-0a94-4552-8973-367f7a86719d",
+        "source": "kraken_blog",
+        "title": "Token Spotlight: What is SoFiUSD (SOFID)?",
+        "reviewed_type": "other",
+        "applied": false
+      },
+      {
+        "fact_id": "84bb2f18-6246-4431-a037-0a4a3d417595",
+        "source": "coindesk",
+        "title": "The SEC Is finally modernizing transfer-agent rules. Wall Street must not repeat the ‘paperwork crisis’",
+        "reviewed_type": "regulatory",
+        "applied": false
+      },
+      {
+        "fact_id": "3f107d19-9f8d-4375-864c-6dbc2022f46f",
+        "source": "coindesk",
+        "title": "Clock's ticking: UK's crypto regulatory application window opens with February deadline",
+        "reviewed_type": "regulatory",
+        "applied": false
+      },
+      {
+        "fact_id": "ceac2b04-cfec-43fb-a406-dff4234a6f56",
+        "source": "coindesk",
+        "title": "SEC proposes new crypto custody rules for investment advisers and funds",
+        "reviewed_type": "regulatory",
+        "applied": false
+      },
+      {
+        "fact_id": "a35320f4-8583-4609-8e5a-ef3295e0edfa",
+        "source": "coindesk",
+        "title": "Bank group sues U.S. regulator over granting crypto trust charters",
+        "reviewed_type": "regulatory",
+        "applied": false
+      },
+      {
+        "fact_id": "393b45eb-c45c-4d50-b0b8-55e6a3f66235",
+        "source": "coindesk",
+        "title": "The Clarity Act stalled. Bankers aren’t hitting the brakes yet on crypto dealmaking",
+        "reviewed_type": "other",
+        "applied": false
+      },
+      {
+        "fact_id": "6fdea295-f3d6-4363-a5a2-c08edd2256f6",
+        "source": "coindesk",
+        "title": "SEC approves a 3x fix for bitcoin and ether traders who miss the wild swings",
+        "reviewed_type": "regulatory",
+        "applied": false
+      },
+      {
+        "fact_id": "98bdc49e-e510-40ff-9c02-7c17a98aa987",
+        "source": "coindesk",
+        "title": "Kraken operator Payward and Singapore Gulf Bank partner for 24/7 institutional crypto settlement",
+        "reviewed_type": "other",
+        "applied": false
+      },
+      {
+        "fact_id": "b62100d3-2446-4506-ac69-a8a19f0009be",
+        "source": "coindesk",
+        "title": "U.S. CFTC joins SEC in proposing crypto regulations, though spot-market gap lingers",
+        "reviewed_type": "regulatory",
+        "applied": false
+      },
+      {
+        "fact_id": "7b99f9dc-4d72-47ad-a789-1624d1d010a5",
+        "source": "coindesk",
+        "title": "Rain is seeking a national trust bank charter to bypass third-party banks",
+        "reviewed_type": "other",
+        "applied": false
+      },
+      {
+        "fact_id": "8feb3a7d-aed2-4e9c-8a6e-89bb048e4dd7",
+        "source": "coindesk",
+        "title": "Tether tapped by Kazakhstan’s central bank to explore stablecoin and tokenization",
+        "reviewed_type": "other",
+        "applied": false
+      },
+      {
+        "fact_id": "b56bd3ce-83fe-42e3-8070-9bf655f607cf",
+        "source": "coindesk",
+        "title": "Ripple is earning fees financing leveraged stock bets, a business long run by banks",
+        "reviewed_type": "other",
+        "applied": false
+      },
+      {
+        "fact_id": "6cb9f96a-13a8-48c2-b127-fe63b0d602fb",
+        "source": "cointelegraph",
+        "title": "Samsung Wallet to add USDC transfers for US Galaxy users in October",
+        "reviewed_type": "other",
+        "applied": false
+      },
+      {
+        "fact_id": "9733ccf1-18c7-4c58-aef9-587f89c2b903",
+        "source": "cointelegraph",
+        "title": "Tether, Kazakhstan cenbank mull tenge stablecoin and asset tokenization",
+        "reviewed_type": "other",
+        "applied": false
+      },
+      {
+        "fact_id": "d98dd784-2679-4f8d-8254-c2fe3635c0c7",
+        "source": "cointelegraph",
+        "title": "House Finance panel chair says regulator actions on crypto ‘fall short’ of CLARITY bill",
+        "reviewed_type": "regulatory",
+        "applied": false
+      },
+      {
+        "fact_id": "264eb6a9-3b95-480f-aaf1-e74ed150e543",
+        "source": "cointelegraph",
+        "title": "Russia clears first crypto exchanges, custodians under new law",
+        "reviewed_type": "other",
+        "applied": false
+      },
+      {
+        "fact_id": "9979f51b-304a-4993-bbf2-05aa7cbb94dd",
+        "source": "cointelegraph",
+        "title": "Bitcoin.de trading remains halted as German regulator rejects MiCA application",
+        "reviewed_type": "regulatory",
+        "applied": false
+      },
+      {
+        "fact_id": "dc74fb9c-2565-4e16-9366-8bc979eebe7f",
+        "source": "cointelegraph",
+        "title": "Conduit sues Tether over allegedly freezing $2.8M without explanation",
+        "reviewed_type": "regulatory",
+        "applied": false
+      },
+      {
+        "fact_id": "0dbbf44f-5a87-4ed5-b179-67b317972f65",
+        "source": "coindesk",
+        "title": "EU securities regulator gives crypto platforms 3 months to remove unauthorized stablecoins",
+        "reviewed_type": "regulatory",
+        "applied": false
+      },
+      {
+        "fact_id": "b5768c2a-e964-4756-86dc-39c3cc6f8e4c",
+        "source": "cointelegraph",
+        "title": "ESMA gives crypto firms 3 months to exit non-compliant stablecoins",
+        "reviewed_type": "regulatory",
+        "applied": false
+      },
+      {
+        "fact_id": "c8b414ce-8e10-4e74-bde0-176d5a10e265",
+        "source": "cointelegraph",
+        "title": "Netflix drops trailer for series based on FTX’s SBF and Caroline Ellison",
+        "reviewed_type": "other",
+        "applied": false
+      },
+      {
+        "fact_id": "0d99a9da-e479-44ca-93f2-00b316efa5d1",
+        "source": "cointelegraph",
+        "title": "China’s P2P stablecoin wallets surge 43x, Korea’s $450B crypto economy: Asia Express",
+        "reviewed_type": "regulatory",
+        "applied": false
+      },
+      {
+        "fact_id": "81c935fb-4bd0-4899-bc02-00ebf4bd864b",
+        "source": "cointelegraph",
+        "title": "Cantor Fitzgerald faces Senate Democrat’s questions over Tether ties",
+        "reviewed_type": "other",
+        "applied": false
+      },
+      {
+        "fact_id": "03cf4d2e-d1cd-437e-ac03-8e00ad593527",
+        "source": "coindesk",
+        "title": "XRP Ledger adds new controls for banks, stablecoins and tokenized funds",
+        "reviewed_type": "other",
+        "applied": false
+      },
+      {
+        "fact_id": "bdb8cf6b-3d09-43d0-be19-a3b09e791fbf",
+        "source": "cointelegraph",
+        "title": "ESMA seeks evidence tokenized collateral can be cashed out in crisis",
+        "reviewed_type": "regulatory",
+        "applied": false
+      },
+      {
+        "fact_id": "bd44ece3-fa5e-4879-8ddc-ef3d421f461b",
+        "source": "coindesk",
+        "title": "New York AG secures up to $35 million and lifetime crypto ban from Celsius’ Alex Mashinsky",
+        "reviewed_type": "regulatory",
+        "applied": false
+      },
+      {
+        "fact_id": "28a0b5a1-f884-4082-8d39-60cad1256e3d",
+        "source": "cointelegraph",
+        "title": "Blockchain.com pursues CFTC approval for prediction markets: CNBC",
+        "reviewed_type": "regulatory",
+        "applied": false
+      },
+      {
+        "fact_id": "6c5af6c8-22c8-477d-8b9d-714eb1ade596",
+        "source": "cointelegraph",
+        "title": "New York permanently bars Celsius founder Mashinsky in $35M fraud settlement",
+        "reviewed_type": "regulatory",
+        "applied": false
+      },
+      {
+        "fact_id": "0d0633c1-2da5-4df4-897f-325960e356aa",
+        "source": "cointelegraph",
+        "title": "South Korean bank launches Bitcoin-backed business loans: Report",
+        "reviewed_type": "other",
+        "applied": false
+      },
+      {
+        "fact_id": "45ec5698-69c3-4b07-9317-2009333a1b7a",
+        "source": "coindesk",
+        "title": "South Korea just got its first traditional bank loans backed by bitcoin",
+        "reviewed_type": "other",
+        "applied": false
+      },
+      {
+        "fact_id": "10e12030-90f2-4a12-8c3b-44dfcbf2e0f6",
+        "source": "cointelegraph",
+        "title": "FTX’s crypto mining venture is now used to advance AI",
+        "reviewed_type": "other",
+        "applied": false
+      }
+    ]
+  },
+  "reviewed_source": {
+    "fact_id": "8a0ef52e-0a94-4552-8973-367f7a86719d",
+    "source": "kraken_blog",
+    "title": "Token Spotlight: What is SoFiUSD (SOFID)?",
+    "archived_evidence_characters": 537,
+    "cause": "v2 regulatory ban substring matched bank in an educational stablecoin article",
+    "v3_classification": "other",
+    "no_regulatory_action_in_archived_evidence": true
+  },
+  "apply": {
+    "applied": true,
+    "created": true,
+    "source_fact_id": "8a0ef52e-0a94-4552-8973-367f7a86719d",
+    "reviewed_type": "other",
+    "correction_id": "d3a7748c-e309-4971-9298-3cedffbd3668",
+    "corrected_fact_id": "d3df6f9d-4cd5-4be0-99fc-317d7a5be148",
+    "retired_fact_id": "e8cf1c77-bf33-4544-b36c-1c5c1d4b04d6",
+    "available_at": "2026-10-14T03:05:54.098265Z",
+    "boundary": "deployed Research helper via authenticated Data API; no incoming Research HTTP or owner approval"
+  },
+  "explicit_replay_separate_process": {
+    "applied": true,
+    "created": false,
+    "source_fact_id": "8a0ef52e-0a94-4552-8973-367f7a86719d",
+    "reviewed_type": "other",
+    "correction_id": "d3a7748c-e309-4971-9298-3cedffbd3668",
+    "corrected_fact_id": "d3df6f9d-4cd5-4be0-99fc-317d7a5be148",
+    "retired_fact_id": "e8cf1c77-bf33-4544-b36c-1c5c1d4b04d6",
+    "available_at": "2026-10-14T03:05:54.098265Z",
+    "boundary": "deployed Research helper via authenticated Data API; no incoming Research HTTP or owner approval"
+  },
+  "verification": [
+    {
+      "source_hash_matches_frozen_request": true,
+      "source_fact_id": "8a0ef52e-0a94-4552-8973-367f7a86719d"
+    },
+    {
+      "before_correction_active_facts": [
+        {
+          "fact_id": "8a0ef52e-0a94-4552-8973-367f7a86719d",
+          "event_type": "regulatory",
+          "retracted": false
+        }
+      ],
+      "after_correction_active_facts": [
+        {
+          "fact_id": "d3df6f9d-4cd5-4be0-99fc-317d7a5be148",
+          "event_type": "other",
+          "retracted": false
+        }
+      ]
+    }
+  ],
+  "audit_count_for_source": 1,
+  "replacement_count_for_source": 1,
+  "retirement_count_for_source": 1,
+  "effective_time_raw_id_and_evidence_preserved": true,
+  "availability_generated_by_database_after_original": true,
+  "original_v2_versions_preserved": 375,
+  "observed_v3_versions_after": 38,
+  "version_count_caveat": "Includes continuing normal extraction and the two correction versions; not independent evaluable events.",
+  "saved_review_request_mode": "600",
+  "service_container_ids_unchanged_during_acceptance": true,
+  "loops": 0,
+  "campaigns": 0,
+  "new_e2_model_calls": 0,
+  "boundaries": [
+    "Authenticated deployed Research helper to Data API, not authenticated incoming Research review HTTP or normal owner E2 approval.",
+    "Two short-lived maintenance helper processes, not a restarted production Research service, not in-flight response-loss fault injection.",
+    "PIT query verifies the single corrected logical source before/after audit cutoff, not a complete immutable snapshot API acceptance.",
+    "31 previewed classifications are deterministic rule results, not 31 semantically validated or corrected facts.",
+    "Only the explicitly inspected SoFiUSD article was prospectively corrected; all other previewed records remain unmodified.",
+    "Chrome old page AX remained stale after free-check click; refresh showed blank content. No current coverage result or product failure conclusion obtained.",
+    "No paid E2 search, champion, Forward, holdout or adoption started."
+  ]
+}

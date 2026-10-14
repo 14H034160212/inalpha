@@ -121,7 +121,7 @@ For offline evidence preparation and #206 adapter contracts, see
 [Unified model usage](../../docs/usage/README.md). These tools do not authorize paid runs
 or establish real-data pilot readiness.
 
-## 旧版事件事实审核（已部署，生产写入链路未验收）
+## 旧版事件事实审核（已部署，helper→Data单条写入已验证）
 
 `POST /event-facts/review` 沿用 `event_extract_request` 平台服务鉴权，不接受普通 owner
 修改全局事实。请求指定原事实 ID/哈希、纠正 UUID 和审核理由；`dry_run` 默认 true，
@@ -141,5 +141,7 @@ Data 原子追加撤回/替代版本，生成当前数据库可见时间，并�
 v3 规则确认不等于语义审核、匹配对照或 FDR 通过，不能借此补齐旧冻结窗口。
 状态及实测证据见 [当前状态](../../docs/04-current-state.md)。
 
-2026-10-14正常Research服务helper经Data服务鉴权完成一条真实原文预览，保留监管分类、
+2026-10-14初次部署回执：正常Research服务helper经Data服务鉴权完成一条真实原文预览，保留监管分类、
 无写入；这不是认证入站HTTP或owner授权验收。详见 [发布回执](../../docs/validation/event-fact-review-deployment-2026-10-14.json)。
+
+后续逐条预览31条旧监管事实，只在明确阅读原文后纠正一条SoFiUSD科普文章；同一冻结请求由第二个独立helper进程重发，复用原审计和替代事实。剩余30条仍未纠正，不能把v3规则输出当成完整语义审核或解除E2输入门槛。认证入站HTTP、完整服务恢复与正常owner搜索待验证。见 [单条生产回执](../../docs/validation/event-fact-single-production-2026-10-14.json)。
