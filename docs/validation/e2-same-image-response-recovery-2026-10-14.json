@@ -115,5 +115,10 @@
     }
   ],
   "test_setup_fix": "Container URI preserves credentials/port/options, resolves host through explicit host-gateway, removes local numeric-only hostaddr option; peripheral fixtures use container loopback. Persistent read-only observer with bounded transport reconnect; no production settings changed.",
-  "harness_sha256": "b5ef42ae7aa90f8332b4b935159d6a328fbfe8c8f4de2ce994d67db4491552c5"
+  "harness_sha256": "b5ef42ae7aa90f8332b4b935159d6a328fbfe8c8f4de2ce994d67db4491552c5",
+  "response_observation_limits": {
+    "response_count_definition": "All proposal response checkpoint rows, including rows whose response is null; this count alone does not prove a saved response.",
+    "before_non_null_response_count": "not directly sampled before SIGKILL; do not backfill a retrospective value",
+    "persistence_evidence": "Recovery reuse is supported indirectly by zero pre-crash reserve, known settled synthetic cost, two provider calls before plus eight after restart, ten total attempts and ten checkpoints for five generations; this receipt does not independently enumerate pre-crash non-null response payloads."
+  }
 }
