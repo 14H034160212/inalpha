@@ -3,6 +3,7 @@
 import asyncio
 import json
 import os
+import sys
 from decimal import Decimal
 from pathlib import Path
 from uuid import UUID
@@ -14,6 +15,7 @@ from inalpha_evolver.storage import loop_authorizations, proposal_responses
 
 
 async def main():
+    positive = "--positive-control" in sys.argv
     fixture = json.loads(
         await asyncio.to_thread(Path("/probe/exchange/stale_scope.json").read_text)
     )
@@ -29,10 +31,9 @@ async def main():
         assert (
             live["status"] == "replaying" and str(live["lease_token"]) == fixture["new_lease_token"]
         )
-        assert (
-            str(live["lease_token"]) != fixture["old_lease_token"]
-            and live["lease_expires_at"] > live["observed_at"]
-        )
+        assert (positive or str(live["lease_token"]) != fixture["old_lease_token"]) and live[
+            "lease_expires_at"
+        ] > live["observed_at"]
         try:
             await proposal_responses.complete(
                 conn,
@@ -47,6 +48,8 @@ async def main():
                 actual=Decimal("0.000001"),
             )
         except loop_authorizations.LoopAuthorizationUnavailable as exc:
+            if positive:
+                raise AssertionError("live scope rejected") from exc
             await conn.rollback()
             print(
                 json.dumps(
@@ -61,6 +64,18 @@ async def main():
             )
             return
         await conn.rollback()
+        if positive:
+            print(
+                json.dumps(
+                    {
+                        "result": "accepted_rolled_back",
+                        "operation": "proposal_responses.complete",
+                        "active_lease_at_attempt": {k: str(v) for k, v in live.items()},
+                        "reservation_id": fixture["reservation_id"],
+                    }
+                )
+            )
+            return
         raise AssertionError("stale checkpoint write accepted")
 
 

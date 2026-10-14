@@ -9,7 +9,7 @@ from inalpha_shared.db import close_pool, get_conn, init_pool
 from inalpha_evolver.config import EvolverSettings
 from inalpha_evolver.runtime import loop_campaign
 
-sys.path.insert(0, str(Path.cwd() / "services/evolver"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "services/evolver"))
 from tests.test_loop_handoff import ready_loop
 
 

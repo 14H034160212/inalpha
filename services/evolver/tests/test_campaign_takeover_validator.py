@@ -79,3 +79,19 @@ def test_cleanup_tolerates_already_exited_container(monkeypatch):
         "exit_code": 0,
         "errors": [],
     }
+
+
+def test_portless_local_database_uses_postgres_default():
+    assert (
+        validator.container_database_url("postgresql+psycopg://fixture@localhost/a")
+        == "postgresql+psycopg://fixture@host.docker.internal:5432/a"
+    )
+
+
+def test_reused_baseline_fixture_contract_remains_available():
+    """Keep the intentionally reused dev fixture discoverable when tests are refactored."""
+    import inspect
+
+    from .test_loop_handoff import ready_loop
+
+    assert inspect.iscoroutinefunction(ready_loop)

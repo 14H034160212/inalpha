@@ -16,6 +16,7 @@ import socket
 import subprocess
 import sys
 import time
+import traceback
 from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
@@ -44,7 +45,7 @@ def container_database_url(url):
     options = [(k, v) for k, v in parse_qsl(parsed.query) if k != "hostaddr"]
     return urlunsplit(
         parsed._replace(
-            netloc=credentials + "host.docker.internal:" + str(parsed.port),
+            netloc=credentials + "host.docker.internal:" + str(parsed.port or 5432),
             query=urlencode(options),
         )
     )
@@ -316,9 +317,11 @@ def main():
             time.sleep(0.1)
         raise TimeoutError("health")
 
+    stage = "create_audit_database"
     try:
         with psycopg.connect(admin, autocommit=True) as conn:
             conn.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
+        stage = "migrate_audit_database"
         with (logs / "migration.log").open("w") as out:
             subprocess.run(
                 [
@@ -335,6 +338,7 @@ def main():
                 timeout=120,
                 check=True,
             )
+        stage = "seed_synthetic_baseline"
         with (logs / "seed.log").open("w") as out:
             subprocess.run(
                 [python, str(probe_dir / "seed.py"), str(logs / "fixture.json")],
@@ -348,8 +352,10 @@ def main():
         fixture.update(json.loads((logs / "fixture.json").read_text()))
         (exchange / "fixture.json").write_text(json.dumps(fixture))
         with (logs / "app.log").open("w") as out:
+            stage = "initial_app_health"
             child = start(out, "before")
             report["initial_health"] = health()
+            stage = "first_offline_calls"
             deadline = time.monotonic() + 60
             while time.monotonic() < deadline:
                 if (exchange / "calls").exists() and len(
@@ -368,6 +374,48 @@ def main():
                 before["ledger"]["reserved_usd"] > 0
                 and before["ledger"]["max_cost_usd"] > before["ledger"]["reserved_usd"] * 2
             )
+            stage = "live_write_positive_control"
+            with psycopg.connect(raw, row_factory=dict_row) as control_conn:
+                control_conn.execute("SET TRANSACTION READ ONLY")
+                control_conn.execute("SET LOCAL statement_timeout='5s'")
+                reservation = control_conn.execute(
+                    "SELECT reservation_id FROM evolution_loop_proposal_responses WHERE loop_id=%s AND response IS NULL ORDER BY batch LIMIT 1",
+                    (fixture["loop_id"],),
+                ).fetchone()
+            (exchange / "stale_scope.json").write_text(
+                json.dumps(
+                    {
+                        **fixture,
+                        "old_lease_token": str(before["lease_token"]),
+                        "new_lease_token": str(before["lease_token"]),
+                        "reservation_id": str(reservation["reservation_id"]),
+                    }
+                )
+            )
+            control_run = subprocess.run(
+                [
+                    "docker",
+                    "exec",
+                    container_name,
+                    ".venv/bin/python",
+                    "/probe/stale_write.py",
+                    "--positive-control",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=20,
+            )
+            (logs / "positive-control.log").write_text(control_run.stdout + control_run.stderr)
+            if control_run.returncode != 0:
+                raise RuntimeError("live checkpoint positive control failed")
+            report["live_write_positive_control"] = json.loads(control_run.stdout.strip())
+            assert report["live_write_positive_control"]["result"] == "accepted_rolled_back"
+            after_control = observe()
+            assert (
+                after_control["ledger"] == before["ledger"]
+                and after_control["stored_response_count"] == 0
+            )
+            stage = "pause_old_application"
             kill_container("STOP")
             report["sigstop_completed_at"] = datetime.now(UTC).isoformat()
             old_child = child
@@ -378,6 +426,7 @@ def main():
             before = observe()
             assert before["proposal_count"] == 0
             report["before"] = before
+            stage = "observe_natural_expiry"
             deadline = time.monotonic() + 45
             while not observe()["expired"]:
                 if time.monotonic() > deadline:
@@ -388,16 +437,20 @@ def main():
                 expired["expired"] is True and expired["observed_at"] > expired["lease_expires_at"]
             )
             report["expired_lease_observation"] = expired
+            stage = "acquire_observation_lock"
             lock = psycopg.connect(raw)
             lock.execute("SET LOCAL statement_timeout='5s'")
             lock.execute("LOCK TABLE evolution_loop_proposal_responses IN ACCESS EXCLUSIVE MODE")
+            report["observation_lock_acquired_at"] = datetime.now(UTC).isoformat()
             container_name = "inalpha-e2-response-" + uuid4().hex
             with socket.socket() as sock:
                 sock.bind(("127.0.0.1", 0))
                 port = sock.getsockname()[1]
             report["second_application_started_at"] = datetime.now(UTC).isoformat()
+            stage = "takeover_app_health"
             child = start(out, "after")
             report["restart_health"] = health()
+            stage = "observe_replacement_claim"
             deadline = time.monotonic() + 30
             with psycopg.connect(raw, row_factory=dict_row) as claim_conn:
                 while time.monotonic() < deadline:
@@ -426,14 +479,6 @@ def main():
                 and claim["observed_at"] > expired["observed_at"]
             )
             report["second_application_claim"] = claim
-            with psycopg.connect(raw, row_factory=dict_row) as stale_conn:
-                stale_conn.execute("SET TRANSACTION READ ONLY")
-                stale_conn.execute("SET LOCAL statement_timeout='5s'")
-                # The response table is locked, so read the independent reservation ledger.
-                reservation = stale_conn.execute(
-                    "SELECT reservation_id FROM evolution_loop_cost_reservations WHERE loop_id=%s ORDER BY reservation_id LIMIT 1",
-                    (fixture["loop_id"],),
-                ).fetchone()
             (exchange / "stale_scope.json").write_text(
                 json.dumps(
                     {
@@ -444,6 +489,7 @@ def main():
                     }
                 )
             )
+            stage = "stale_write_rejection"
             stale_run = subprocess.run(
                 ["docker", "exec", container_name, ".venv/bin/python", "/probe/stale_write.py"],
                 capture_output=True,
@@ -458,6 +504,8 @@ def main():
             lock.rollback()
             lock.close()
             lock = None
+            report["observation_lock_released_at"] = datetime.now(UTC).isoformat()
+            stage = "unknown_response_stop"
             deadline = time.monotonic() + 120
             while time.monotonic() < deadline:
                 after = observe()
@@ -495,6 +543,7 @@ def main():
             report["old_application_resumed_and_fixture_released_at"] = datetime.now(
                 UTC
             ).isoformat()
+            stage = "resume_old_application_invariance"
             deadline = time.monotonic() + 20
             while time.monotonic() < deadline:
                 final = observe()
@@ -523,6 +572,16 @@ def main():
             report["result"] = "passed"
     except Exception as exc:
         report["error_type"] = type(exc).__name__
+        report["failure_stage"] = stage
+        try:
+            failure_path = logs / "failure-traceback.log"
+            fd = os.open(failure_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            with os.fdopen(fd, "w") as output:
+                traceback.print_exc(file=output)
+            report["private_failure_traceback"] = "failure-traceback.log"
+        except OSError:
+            report["private_failure_traceback"] = "not_written"
+
     finally:
         signal.signal(signal.SIGTERM, signal.SIG_IGN)
         report["cleanup_errors"] = []
