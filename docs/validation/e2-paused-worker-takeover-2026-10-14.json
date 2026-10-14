@@ -1,6 +1,6 @@
 {
   "database": "inalpha_container_audit_d07a6eca8383400288522717b23ecdda",
-  "result": "passed",
+  "result": "partially_passed",
   "scope": "full actual Evolver application lifespan and dispatchers; provider SDK HTTP transport replaced, synthetic local signer/Dashboard/Data; actual fixed business image, local AMD64 emulation, not real owner/production",
   "initial_health": {
     "status": "ok",
@@ -124,7 +124,7 @@
     "expired": null
   },
   "late_response_observation_seconds": 20,
-  "purpose": "Expired old worker returns after new claim: cannot save response, settle reserves or advance stage",
+  "purpose": "Observe paused-worker resume after lease takeover: no state or cost changes during 20 seconds; SDK receipt, stale write attempt and heartbeat-versus-write-fencing mechanism are not independently demonstrated",
   "old_worker_cleanup_exit_code": 0,
   "observer_transient_failures": [],
   "cleanup_exit_code": 0,
@@ -158,5 +158,12 @@
       "error_type": "TimeoutError",
       "scope": "Authorization-table observation lock prevented second app startup health; probe setup issue, not production failure. Both containers cleaned, environment file removed, audit database retained."
     }
+  ],
+  "probe_assertions_result": "passed",
+  "not_demonstrated": [
+    "successful old SDK receipt of the released provider payload",
+    "an attempted old-token complete() write and its explicit rejection",
+    "separation of heartbeat cancellation from write fencing",
+    "full old-worker fencing acceptance"
   ]
 }
