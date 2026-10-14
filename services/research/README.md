@@ -120,3 +120,23 @@ or prices remain unknown. Production deep dives keep their existing response sch
 For offline evidence preparation and #206 adapter contracts, see
 [Unified model usage](../../docs/usage/README.md). These tools do not authorize paid runs
 or establish real-data pilot readiness.
+
+## 旧版事件事实审核（尚未生产验收）
+
+`POST /event-facts/review` 沿用 `event_extract_request` 平台服务鉴权，不接受普通 owner
+修改全局事实。请求指定原事实 ID/哈希、纠正 UUID 和审核理由；`dry_run` 默认 true，
+读取对应的不可变原文并用 v3 规则重新分类，检查资产、行动与证据不变，不写库。
+
+审核者检查预览结果后，以同一参数、`dry_run=false` 和返回的 `expected_review_hash`
+提交。服务重新计算绑定调用者、原事实和审核内容的摘要；参数变化或漏摘要时拒绝。
+同一文章已有新原文时，旧事实不能再确认为活动分类；显式撤回旧分类仍允许。
+Data 原子追加撤回/替代版本，生成当前数据库可见时间，并保存服务身份审计。
+
+没有批量自动纠正；若已有目标分类，需显式审核 `retract=true` 的新预览。原文撤回也只
+允许撤回，不能生成活动替代事实。回执不完整或响应丢失时不自动重发；保留同一纠正 UUID
+和预览参数，恢复后重核来源并由调用者显式重发，Data 返回同一审计结果。服务权限失效
+应重新取得同一已验证服务身份的合法授权（正常Research令牌刷新保持 `service:research`），
+改变服务身份或预览调用者会拒绝原请求；不能伪造 owner 或演化 grant。
+
+v3 规则确认不等于语义审核、匹配对照或 FDR 通过，不能借此补齐旧冻结窗口。
+状态及实测证据见 [当前状态](../../docs/04-current-state.md)。
