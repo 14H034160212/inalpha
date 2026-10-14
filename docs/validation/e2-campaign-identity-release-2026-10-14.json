@@ -44,6 +44,10 @@
     {
       "read_only_stable_window": "45 observations; no three consecutive zeros, final counts one",
       "result": "Stopped before any deployment mutation; no socket was closed or ignored."
+    },
+    {
+      "after_browser_unlocked": "Own new verification tab closed; original tabs kept. Read-only stable watch still did not obtain three consecutive zeros, so no replacement.",
+      "result": "deferred"
     }
   ],
   "server_repository": "a275f8be7679578e4aef62cffb3ff5c6f13a988e",
@@ -71,8 +75,18 @@
     "campaigns": 0,
     "public_login_after_redirects": 200
   },
-  "browser": "CUA reports Mac locked; no cleanup or further normal-owner actions performed, not a product failure.",
+  "browser": "Chrome unlocked after follow-up; task-created verification tab closed, other tabs retained. A temporary blank tab was used during maintenance preparation. No new model prompt or approval.",
   "new_model_calls": 0,
   "new_e2_searches": 0,
-  "next_action": "Wait for naturally idle HTTP window, revalidate task/connection guards and unchanged original image, then deploy only Evolver with exact image rollback. Do not force-close user connections or claim production five-generation recovery."
+  "next_action": "Wait for naturally idle HTTP window, revalidate task/connection guards and unchanged original image, then deploy only Evolver with exact image rollback. Do not force-close user connections or claim production five-generation recovery.",
+  "built_image_probe": {
+    "image": "ghcr.io/mirror29/inalpha-evolver:a275f8be7679578e4aef62cffb3ff5c6f13a988e",
+    "network": "none",
+    "ephemeral_container_removed": true,
+    "identity_projection_present": true,
+    "public_schema_excludes_identity": true,
+    "campaign_module_sha256": "4b2cff25407847e718fc609c257e9a85f9b9fc56014e72a27d0fc6e4ea177cd1",
+    "source_hash_matches_reviewed_business_file": true,
+    "scope": "Pure package/schema import in actual built image, not application lifespan, real owner or production execution."
+  }
 }
