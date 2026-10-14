@@ -145,3 +145,5 @@ v3 规则确认不等于语义审核、匹配对照或 FDR 通过，不能借此
 无写入；这不是认证入站HTTP或owner授权验收。详见 [发布回执](../../docs/validation/event-fact-review-deployment-2026-10-14.json)。
 
 后续逐条预览31条旧监管事实，只在明确阅读原文后纠正一条SoFiUSD科普文章；同一冻结请求由第二个独立helper进程重发，复用原审计和替代事实。剩余30条仍未纠正，不能把v3规则输出当成完整语义审核或解除E2输入门槛。认证入站HTTP、完整服务恢复与正常owner搜索待验证。见 [单条生产回执](../../docs/validation/event-fact-single-production-2026-10-14.json)。
+
+同轮后续对两条BTC旧监管事实明确检查归档后保留监管分类，各追加一个v3确认版本，无撤回；其中SEC事实仅有标题，不能宣称完整正文审核。确认后的owner预检仍待读取，不宣称质量守卫已解除。见 [确认回执](../../docs/validation/event-fact-btc-confirmation-2026-10-14.json)。
