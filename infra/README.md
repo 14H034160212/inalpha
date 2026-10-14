@@ -85,5 +85,9 @@ Compose 中明确声明的 Inalpha 应用镜像仓库。每个仓库保留最近
 python3 scripts/cleanup-images.py --repository ghcr.io/mirror29/inalpha-dashboard
 ```
 
+生产 Compose 的全部服务均配置 `json-file` 日志轮转，每个文件最多 `10m`，保留
+`3` 个文件，每容器约 30 MB。新配置在容器下次创建或重建时生效，普通 restart
+不会改变已有容器的日志配置。更新配置后应随计划内部署启用，不必重启 Docker daemon。
+
 `docker compose down` 只停止容器并保留 volume。`docker compose down -v` 会永久删除开发
 数据库 volume，只能在明确要重建本地数据时使用。
