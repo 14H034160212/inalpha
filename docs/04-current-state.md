@@ -39,6 +39,8 @@ Inalpha 是 AI agent 编排与多 Python kernel 的量化实验框架。D-12 与
 | 在途响应未知时退出 | 已有费用/响应回归 | 同镜像重启及再次重启均停在`LOOP_PROPOSAL_RESPONSE_UNCONFIRMED`；调用总数2，未知预留0.0340608保持，额度1充足 | 未取得真实供应商对账与生产未知费用恢复证据 |
 | 其他故障、交接与一次性holdout | 已有相关状态机与自动化 | 部分源码进程/受控数据库证据；完整矩阵待补 | 生产恢复、冠军与长期正向链路未完成 |
 
+已将双进程探索整理为 [固定镜像接手工具](../services/evolver/scripts/validate_campaign_takeover.py)，新增镜像/连接边界与清理超时、已退出竞争和夹具契约9项回归。最终同镜像运行先以相同reservation/参数在有效租约下完成并回滚写入作为对照，再在新租约仍为`replaying`且未过期时，直接旧token调用`proposal_responses.complete()`收到`LOOP_AUTHORIZATION_UNAVAILABLE`；预留0.0340608、非空响应0和阶段保持不变。两容器退出0，env删除及独立Docker清理确认；9项测试、Ruff/格式、一致性19/0/12通过。见 [维护工具回执](validation/e2-maintained-takeover-validator-2026-10-14.json)。这是实际存储调用拒绝证据，不是旧SDK回调收包、完整外围授权栈或生产fencing通过；其他故障场景尚未整理为维护套件。
+
 同镜像双进程补充：旧应用SIGSTOP后租约自然过期，新应用接手并拒绝未知响应重发；恢复旧应用、释放离线响应后连续20秒观察费用预留、零非空响应、零提案及阶段均未变化。未直接采样旧SDK成功收包或旧complete()调用，不能区分心跳取消与写入fencing；仍不视为整个旧worker矩阵完成。见 [暂停worker接手回执](validation/e2-paused-worker-takeover-2026-10-14.json)。
 
 同镜像回执：[已知响应恢复](validation/e2-same-image-response-recovery-2026-10-14.json) / [未知响应阻断](validation/e2-same-image-unknown-response-2026-10-14.json)。无效DSL使用既有回退，成功实现数不代表有效变异或改善；两项都是临时探索脚本，尚非CI维护套件。前期失败与观察端超时保留在回执，不删除审计库。
