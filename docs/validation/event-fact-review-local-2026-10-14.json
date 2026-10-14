@@ -21,8 +21,8 @@
       "skipped_reason": "dedicated ledger DB not configured",
       "excluded": "network/integration tests"
     },
-    "data_isolated_tests": 34,
-    "data_retained_audit_database": "inalpha_fact_corrections_cf96ad7b2e54457ab1a7da7ecdbe4b8a",
+    "data_isolated_tests": 37,
+    "data_retained_audit_database": "inalpha_fact_corrections_e8281713223d4383954b219b7b904539",
     "recorded_audit_downgrade_rejected": true,
     "mypy": "four Research changed source files and Data route/correction module passed; remaining storage baseline errors documented separately",
     "ruff": "changed sources/tests passed",
@@ -47,6 +47,20 @@
       "retained_audit_database": "inalpha_review_process_e2f084f54f4f40d6bc866779e10c5206",
       "cleanup": "only these owned subprocesses stopped; audit database retained",
       "limits": "temporary exploratory script; synthetic local platform service authority; source apps not reviewed production images; not production or E2 model restart validation"
+    },
+    "data_route_tests_after_final_assertion": 7,
+    "automatic_review": {
+      "reviewed_head": "2114538e7dd740db4256e11f1bf776d889be28ab",
+      "findings": "3 MEDIUM",
+      "asset_order": "existing EventFactWriteRequest.normalize_assets canonicalizes writes; real DB multiasset regression added",
+      "internal_validation": "fixed safe server500; conflict409 and internal500 route regressions",
+      "identity_rotation": "intentional identity/content binding; normal Research refresh keeps sub service:research; changed subject is rejected",
+      "scope": "old reviewed head, not latest-head approval"
+    },
+    "failed_route_assertion": {
+      "result": "1 failed /36 passed",
+      "cause": "test expected nested error object; shared handler emits top-level code",
+      "resolution": "assert exact existing top-level code; rerun37 + final route7 passed"
     }
   },
   "limits": [
@@ -69,5 +83,6 @@
       "Data": "ee655f39 healthy",
       "Research": "4441cb07 healthy"
     }
-  }
+  },
+  "latest_error_fix_commit": "dfde3256bce8069abdad93a9affe1f2a71c2f7fa"
 }
