@@ -262,6 +262,6 @@ DATABASE_URL="<local-postgresql-url>" .venv/bin/python scripts/validate_campaign
   --image "ghcr.io/mirror29/inalpha-evolver:<40-character-business-sha>"
 ```
 
-需要本地 PostgreSQL、Docker、Evolver dev 依赖和 migrations 虚拟环境。工具新建并迁移 UUID 审计库，启动两个完整 Evolver 应用；暂停旧进程并等待真实租约过期，先以当前有效 token 对同一 reservation 执行并回滚 `proposal_responses.complete()` 作为正向对照；再观察接手的新 token，并尝试旧 token 的相同写入。旧请求必须被拒绝，未知费用预留及阶段不得改变。外围 Data、签发与模型 HTTP 是合成夹具，不购买真实模型调用；不是正常 owner 或生产授权验收，也不证明旧 SDK 回调成功收包。
+需要本地 PostgreSQL、Docker、Evolver dev 依赖和 migrations 虚拟环境。工具新建并迁移 UUID 审计库，启动两个完整 Evolver 应用；先以当前有效 token 对同一 reservation 执行并回滚 `proposal_responses.complete()` 作为正向对照；再暂停旧进程，等待真实租约过期，观察接手的新 token，并尝试旧 token 的相同写入。旧请求必须被拒绝，未知费用预留及阶段不得改变。外围 Data、签发与模型 HTTP 是合成夹具，不购买真实模型调用；不是正常 owner 或生产授权验收，也不证明旧 SDK 回调成功收包。
 
 回执和私有日志写入仓库 `.tmp/e2-takeover-validation/`；审计库保留，只清理本次 UUID 容器及临时 env。工具明确记录清理错误，不把 Docker 查询失败当作容器已删除。临时隔离响应表锁用于观察领取状态，回执记录取得/释放时间；失败阶段写入回执，traceback 只保存在私有日志中。合成 baseline 故意复用 checkout 的 `tests.test_loop_handoff.ready_loop`（需要 dev 依赖），由路径定位和 CI 契约测试防止无声漂移，不是可安装的生产 seed 接口。单次检查仍不能替代完整故障矩阵、真实五代搜索和长期 Forward/holdout；剩余清单见 [当前状态](../../docs/04-current-state.md#未完成--下一步)。
