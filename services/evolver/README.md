@@ -253,3 +253,15 @@ Loop 每代两批模型请求分别持久化 dispatch、响应与费用预留，
 请求已登记但响应未保存时，系统无法证明供应商是否计费：保留预留费用并以 `LOOP_PROPOSAL_RESPONSE_UNCONFIRMED` 停止自动重发，也不会启动同代另一批新请求来绕过此状态。应先核对用量，再明确准备并批准新实验；不清除旧预留或伪装为免费重试。响应已保存但缺少 usage 时仍保留未知费用。
 
 该功能先迁移 `0068`（依赖 `0067`），再部署 Evolver；存在批次记录时禁止降级删除。独立 non-Loop campaign 不使用此缓存。53 项相关回归及离线进程注入已通过，生产部署/正常 owner 续跑尚待，详细范围见 [回执](../../docs/validation/e2-proposal-response-recovery-2026-10-12.json)。
+
+### 固定镜像接手与旧租约写入检查
+
+```bash
+# 先缓存对应业务 SHA 的 linux/amd64 镜像；本命令只使用已有缓存的固定 image ID。
+DATABASE_URL="<local-postgresql-url>" .venv/bin/python scripts/validate_campaign_takeover.py \
+  --image "ghcr.io/mirror29/inalpha-evolver:<40-character-business-sha>"
+```
+
+需要本地 PostgreSQL、Docker、Evolver dev 依赖和 migrations 虚拟环境。工具新建并迁移 UUID 审计库，启动两个完整 Evolver 应用；暂停旧进程并等待真实租约过期，观察新 token，再从该镜像直接尝试旧 token 的 `proposal_responses.complete()`。旧请求必须被拒绝，未知费用预留及阶段不得改变。外围 Data、签发与模型 HTTP 是合成夹具，不购买真实模型调用；不是正常 owner 或生产授权验收，也不证明旧 SDK 回调成功收包。
+
+回执和私有日志写入仓库 `.tmp/e2-takeover-validation/`；审计库保留，只清理本次 UUID 容器及临时 env。工具明确记录清理错误，不把 Docker 查询失败当作容器已删除。单次检查仍不能替代完整故障矩阵、真实五代搜索和长期 Forward/holdout；剩余清单见 [当前状态](../../docs/04-current-state.md#未完成--下一步)。
