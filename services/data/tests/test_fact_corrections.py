@@ -45,7 +45,7 @@ def review(source, *, retracted=False):
     )
 
 
-async def seed(conn):
+async def seed(conn, *, assets=None):
     now = datetime.now(UTC) - timedelta(minutes=5)
     raw, _ = await ingest_raw_event(
         conn,
@@ -69,7 +69,7 @@ async def seed(conn):
                 f"{raw['source']}\0{raw['source_event_id']}\0regulatory".encode()
             ).hexdigest()[:48],
             event_type="regulatory",
-            assets=["BTC"],
+            assets=assets if assets is not None else ["BTC"],
             action="Bitcoin bank custody",
             severity=0.6,
             confidence=0.85,
@@ -288,6 +288,18 @@ async def test_same_classification_review_appends_one_version_without_retirement
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("db_pool")
+async def test_regular_writer_canonicalizes_legacy_multi_asset_review():
+    async with get_conn() as conn:
+        source = await seed(conn, assets=["eth", "BTC", "btc"])
+        assert source["assets"] == ["BTC", "ETH"]
+        _, corrected, _ = await fact_corrections.correct_fact(
+            conn, source["fact_id"], review(source), service_subject="service:research"
+        )
+        assert corrected["assets"] == source["assets"]
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("db_pool")
 async def test_pending_new_raw_evidence_prevents_revalidating_stale_fact():
     async with get_conn() as conn:
         source = await seed(conn)
@@ -463,7 +475,10 @@ async def test_concurrent_reviews_do_not_append_twice(same_operation):
         assert (await cur.fetchone())["n"] == 1
 
 
-@pytest.mark.parametrize("mode", ["missing", "owner", "wrong_purpose", "service"])
+@pytest.mark.parametrize(
+    "mode",
+    ["missing", "owner", "wrong_purpose", "service", "service_conflict", "service_invariant"],
+)
 def test_correction_route_requires_existing_extraction_authority(monkeypatch, mode):
     import time
     from unittest.mock import AsyncMock
@@ -537,6 +552,12 @@ def test_correction_route_requires_existing_extraction_authority(monkeypatch, mo
         corrected,
         True,
     )
+    if mode == "service_conflict":
+        mutation.side_effect = ConflictError(
+            "stale fixture source", code="EVENT_FACT_CORRECTION_CONFLICT"
+        )
+    if mode == "service_invariant":
+        mutation.side_effect = ValueError("private fixture invariant detail")
     read = AsyncMock(return_value=corrected)
     monkeypatch.setattr(events.store, "get_fact", read)
     # Exercise the real dependency without opening a database or widening owner rights.
@@ -547,12 +568,19 @@ def test_correction_route_requires_existing_extraction_authority(monkeypatch, mo
             headers=headers,
         )
         exact_read = client.get(f"/api/v1/events/facts/{corrected_id}", headers=headers)
-    if mode == "service":
-        assert response.status_code == 200
+    if mode.startswith("service"):
+        expected = {"service": 200, "service_conflict": 409, "service_invariant": 500}[mode]
+        assert response.status_code == expected
         assert exact_read.status_code == 200
         assert exact_read.json()["fact_id"] == str(corrected_id)
         read.assert_awaited_once()
-        assert response.json()["fact"]["fact_id"] == str(corrected_id)
+        if mode == "service":
+            assert response.json()["fact"]["fact_id"] == str(corrected_id)
+        elif mode == "service_conflict":
+            assert response.json()["code"] == "EVENT_FACT_CORRECTION_CONFLICT"
+        elif mode == "service_invariant":
+            assert "private fixture invariant detail" not in response.text
+            assert response.json()["code"] == "EVENT_FACT_CORRECTION_INVARIANT"
         mutation.assert_awaited_once()
         assert mutation.await_args.kwargs["service_subject"] == "service:test"
     else:

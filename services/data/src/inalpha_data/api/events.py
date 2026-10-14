@@ -109,7 +109,9 @@ async def correct_event_fact(
     except LookupError as exc:
         raise EventRecordNotFoundError("source fact not found") from exc
     except ValueError as exc:
-        raise ValidationError(str(exc), code="EVENT_FACT_CORRECTION_INVALID") from exc
+        raise InalphaError(
+            "correction could not preserve stored evidence", code="EVENT_FACT_CORRECTION_INVARIANT"
+        ) from exc
     return EventFactCorrectionResponse(
         correction=EventFactCorrectionRecord(**audit),
         fact=EventFactRecord(**fact),
