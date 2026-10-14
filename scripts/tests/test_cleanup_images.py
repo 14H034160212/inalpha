@@ -11,6 +11,7 @@ from unittest.mock import patch
 module = runpy.run_path(str(Path(__file__).parents[1] / "cleanup-images.py"))
 candidates = module["candidates"]
 remove_image = module["remove_image"]
+created_at = module["created_at"]
 REPO = "ghcr.io/mirror29/inalpha-data"
 CUTOFF = datetime(2026, 10, 13, tzinfo=timezone.utc)
 
@@ -25,6 +26,16 @@ def image(number, repo=REPO, tags=None):
 
 
 class CleanupImagesTests(unittest.TestCase):
+    def test_normalizes_docker_fractional_timestamps_for_older_python(self):
+        self.assertEqual(
+            created_at("2026-10-13T00:00:00.123456789Z"),
+            datetime(2026, 10, 13, microsecond=123456, tzinfo=timezone.utc),
+        )
+        self.assertEqual(
+            created_at("2026-10-13T00:00:00.1Z"),
+            datetime(2026, 10, 13, microsecond=100000, tzinfo=timezone.utc),
+        )
+
     def test_preserves_two_latest_and_container_and_rollback_images(self):
         images = [image(n) for n in range(1, 8)]
         selected = candidates(images, {REPO}, {"sha256:1", "sha256:2"}, 2, CUTOFF)

@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import re
 import subprocess
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -26,6 +27,13 @@ def repositories(image):
     }
 
 
+def created_at(value):
+    normalized = re.sub(
+        r"\.(\d+)", lambda match: "." + match[1][:6].ljust(6, "0"), value
+    )
+    return datetime.fromisoformat(normalized.replace("Z", "+00:00"))
+
+
 def candidates(images, allowed, protected, keep, cutoff):
     grouped = {repo: [] for repo in allowed}
     for image in images:
@@ -41,7 +49,7 @@ def candidates(images, allowed, protected, keep, cutoff):
         if repositories(image)
         and repositories(image) <= allowed
         and image["Id"] not in retained
-        and datetime.fromisoformat(image["Created"].replace("Z", "+00:00")) < cutoff
+        and created_at(image["Created"]) < cutoff
     ]
 
 
