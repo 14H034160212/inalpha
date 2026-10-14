@@ -292,5 +292,23 @@
       "extraction_completed": true
     }
   ],
-  "observation_scope": "Initial single-correction evidence before the two later BTC confirmations documented separately in event-fact-btc-confirmation-2026-10-14.json."
+  "observation_scope": "Initial single-correction evidence before the two later BTC confirmations documented separately in event-fact-btc-confirmation-2026-10-14.json.",
+  "retirement_version_semantics": {
+    "meaning": "source_fact_id identifies the preserved immutable original row; retired_fact_id identifies a newly appended retracted version under the same logical fact_key, not a mutation of source_fact_id. Both are market_event_facts.fact_id UUIDs. Active before/after listings intentionally exclude retracted versions.",
+    "independent_read_only_mapping": {
+      "source_fact_id": "8a0ef52e-0a94-4552-8973-367f7a86719d",
+      "source_version": 1,
+      "source_retracted": false,
+      "retirement_version_fact_id": "e8cf1c77-bf33-4544-b36c-1c5c1d4b04d6",
+      "retirement_version": 2,
+      "retirement_retracted": true,
+      "same_source_retirement_key": true,
+      "same_raw_id": true,
+      "same_evidence": true,
+      "same_effective_time": true,
+      "replacement_fact_id": "d3df6f9d-4cd5-4be0-99fc-317d7a5be148",
+      "replacement_type": "other",
+      "replacement_distinct_key": true
+    }
+  }
 }
