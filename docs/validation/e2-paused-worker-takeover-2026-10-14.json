@@ -1,0 +1,113 @@
+{
+  "database": "inalpha_container_audit_4d31c92f69b44889ada7870701cc1cc7",
+  "result": "passed",
+  "scope": "full actual Evolver application lifespan and dispatchers; provider SDK HTTP transport replaced, synthetic local signer/Dashboard/Data; actual fixed business image, local AMD64 emulation, not real owner/production",
+  "initial_health": {
+    "status": "ok",
+    "service": "inalpha-evolver",
+    "event_evolution": "enabled"
+  },
+  "fault": "SIGSTOP old application; wait natural lease expiry; second application claims",
+  "before": {
+    "status": "replaying",
+    "active_generation": 1,
+    "lease_token": "56f69788-06f9-4ed0-8843-82d4b6d0c431",
+    "lease_expires_at": "2026-10-14 07:44:18.667924+00:00",
+    "locked_candidate_id": null,
+    "forward_sandbox_id": null,
+    "holdout_consumed_at": null,
+    "failure_code": null,
+    "proposal_count": 0,
+    "stored_response_count": 0,
+    "response_count": 2,
+    "succeeded": 0,
+    "ledger": {
+      "spent_usd": "0",
+      "reserved_usd": "0.0340608",
+      "max_cost_usd": "1",
+      "attempts": 2
+    },
+    "expired": false
+  },
+  "restart_health": {
+    "status": "ok",
+    "service": "inalpha-evolver",
+    "event_evolution": "enabled"
+  },
+  "after": {
+    "status": "failed",
+    "active_generation": 1,
+    "lease_token": null,
+    "lease_expires_at": null,
+    "locked_candidate_id": null,
+    "forward_sandbox_id": null,
+    "holdout_consumed_at": null,
+    "failure_code": "LOOP_PROPOSAL_RESPONSE_UNCONFIRMED",
+    "proposal_count": 0,
+    "stored_response_count": 0,
+    "response_count": 2,
+    "succeeded": 0,
+    "ledger": {
+      "spent_usd": "0",
+      "reserved_usd": "0.0340608",
+      "max_cost_usd": "1",
+      "attempts": 2
+    },
+    "expired": null
+  },
+  "offline_provider_calls": [
+    "before",
+    "before"
+  ],
+  "local_peripheral_requests": [
+    "snapshot",
+    "local-fixture-grant",
+    "credential",
+    "snapshot",
+    "local-fixture-grant",
+    "credential"
+  ],
+  "after_old_worker_return": {
+    "status": "failed",
+    "active_generation": 1,
+    "lease_token": null,
+    "lease_expires_at": null,
+    "locked_candidate_id": null,
+    "forward_sandbox_id": null,
+    "holdout_consumed_at": null,
+    "failure_code": "LOOP_PROPOSAL_RESPONSE_UNCONFIRMED",
+    "proposal_count": 0,
+    "stored_response_count": 0,
+    "response_count": 2,
+    "succeeded": 0,
+    "ledger": {
+      "spent_usd": "0",
+      "reserved_usd": "0.0340608",
+      "max_cost_usd": "1",
+      "attempts": 2
+    },
+    "expired": null
+  },
+  "late_response_observation_seconds": 20,
+  "purpose": "Expired old worker returns after new claim: cannot save response, settle reserves or advance stage",
+  "old_worker_cleanup_exit_code": 0,
+  "observer_transient_failures": [],
+  "cleanup_exit_code": 0,
+  "env_file_removed": true,
+  "owned_container_removed": true,
+  "image": "ghcr.io/mirror29/inalpha-evolver:a275f8be7679578e4aef62cffb3ff5c6f13a988e",
+  "runtime": "local Docker AMD64 emulation on ARM host; CPUs2/memory4GB; no production container restarted",
+  "entrypoint_shim_sha256": "36614d333dbae8accddc8cdec7622bb60a6c90c5281067d9c3da868672093966",
+  "business_sha": "a275f8be7679578e4aef62cffb3ff5c6f13a988e",
+  "new_production_model_calls": 0,
+  "production_e2_searches_started": 0,
+  "harness_sha256": "f6883789df80992aade48aa77ed875543da445dc78a82d21dc68c79be77f79be",
+  "observation_limits": [
+    "Old application resumed and provider fixture release marker set; this probe did not directly sample successful SDK receipt or an attempted stale complete() call. Heartbeat cancellation and write fencing cannot be separated from this observation.",
+    "Twenty seconds of unchanged database observations do not prove all late-response races.",
+    "Isolated synthetic baseline and local signer/credential/Data HTTP fixtures; not normal-owner authorization or production fencing acceptance.",
+    "No provider invoice exists for offline fixture calls; known spend zero is not evidence that unknown real calls would be free.",
+    "Audit database retained; owned containers absent in a separate successful Docker listing, and temporary environment file removed.",
+    "Current probe is exploratory and not a maintained CI suite."
+  ]
+}

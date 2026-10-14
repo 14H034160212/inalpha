@@ -39,6 +39,8 @@ BTC旧监管质量提示在这次响应中消失，但语义准确性未评估�
 | 在途响应未知时退出 | 已有费用/响应回归 | 同镜像重启及再次重启均停在`LOOP_PROPOSAL_RESPONSE_UNCONFIRMED`；调用总数2，未知预留0.0340608保持，额度1充足 | 未取得真实供应商对账与生产未知费用恢复证据 |
 | 其他故障、交接与一次性holdout | 已有相关状态机与自动化 | 部分源码进程/受控数据库证据；完整矩阵待补 | 生产恢复、冠军与长期正向链路未完成 |
 
+同镜像双进程补充：旧应用SIGSTOP后租约自然过期，新应用接手并拒绝未知响应重发；恢复旧应用、释放离线响应后连续20秒观察费用预留、零非空响应、零提案及阶段均未变化。未直接采样旧SDK成功收包或旧complete()调用，不能区分心跳取消与写入fencing；仍不视为整个旧worker矩阵完成。见 [暂停worker接手回执](validation/e2-paused-worker-takeover-2026-10-14.json)。
+
 同镜像回执：[已知响应恢复](validation/e2-same-image-response-recovery-2026-10-14.json) / [未知响应阻断](validation/e2-same-image-unknown-response-2026-10-14.json)。无效DSL使用既有回退，成功实现数不代表有效变异或改善；两项都是临时探索脚本，尚非CI维护套件。前期失败与观察端超时保留在回执，不删除审计库。
 
 已有中文/英文桌面UI证据见 [owner语言与参数检查](validation/e2-owner-matrix-language-2026-10-14.json)。工具读取超时和Mac锁定只限定观察范围，不能记为产品通过或失败。
