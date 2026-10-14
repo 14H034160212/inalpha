@@ -21,8 +21,8 @@
       "skipped_reason": "dedicated ledger DB not configured",
       "excluded": "network/integration tests"
     },
-    "data_isolated_tests": 37,
-    "data_retained_audit_database": "inalpha_fact_corrections_e8281713223d4383954b219b7b904539",
+    "data_isolated_tests": 40,
+    "data_retained_audit_database": "inalpha_fact_corrections_c44ca84e23fa4146827f42d362715401",
     "recorded_audit_downgrade_rejected": true,
     "mypy": "four Research changed source files and Data route/correction module passed; remaining storage baseline errors documented separately",
     "ruff": "changed sources/tests passed",
@@ -61,6 +61,19 @@
       "result": "1 failed /36 passed",
       "cause": "test expected nested error object; shared handler emits top-level code",
       "resolution": "assert exact existing top-level code; rerun37 + final route7 passed"
+    },
+    "optimized_data_isolated_tests": {
+      "passed": 40,
+      "PYTHONOPTIMIZE": "1",
+      "retained_audit_database": "inalpha_fact_corrections_25852be64d5d4b609f93200eb6a37dbc",
+      "recorded_audit_downgrade_rejected": true
+    },
+    "latest_automated_review_before_guard_fix": {
+      "reviewed_head": "80078a45790a62d337b1572f6c016a2854b7c811",
+      "run": 38496361064,
+      "findings": "2 MEDIUM",
+      "resolution": "dedicated missing-source sentinel avoids KeyError404; explicit invariant checks replace bare assertions; 404/500 and rollback regressions pass normal and optimized modes",
+      "scope": "latest guard fix requires fresh exact-head CI/review; incremental independent static source review no confirmed new P1/P2"
     }
   },
   "limits": [
@@ -84,5 +97,6 @@
       "Research": "4441cb07 healthy"
     }
   },
-  "latest_error_fix_commit": "dfde3256bce8069abdad93a9affe1f2a71c2f7fa"
+  "latest_error_fix_commit": "dfde3256bce8069abdad93a9affe1f2a71c2f7fa",
+  "latest_guard_fix_commit": "2f0067c89f3b31c5e0228ba5426c97472ad3e7b4"
 }
