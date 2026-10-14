@@ -30,10 +30,26 @@
       "failed": 0,
       "existing_warnings": 12
     },
-    "review": "P2 incomplete acknowledgement parsing fixed; incremental independent static review no new confirmed P1/P2; test fixtures summary only"
+    "review": "P2 incomplete acknowledgement parsing fixed; incremental independent static review no new confirmed P1/P2; test fixtures summary only",
+    "complete_local_processes": {
+      "apps": [
+        "Data",
+        "Research"
+      ],
+      "transport": "real loopback HTTP",
+      "database": "fresh correct migration chain to 0069",
+      "preview_writes": 0,
+      "audit_count": 1,
+      "fact_versions": 3,
+      "research_restart_same_fact": true,
+      "owner_rejected": true,
+      "retained_audit_database": "inalpha_review_process_a1e95ccd4a6e4a7395873006c7786ad1",
+      "cleanup": "only these owned subprocesses stopped; audit database retained",
+      "limits": "temporary exploratory script; synthetic local platform service authority; source apps not reviewed production images; not production or E2 model restart validation"
+    }
   },
   "limits": [
-    "Route and database tests are not complete isolated-service or production review acceptance",
+    "Route/database tests and complete local source-app process check; not production image or production review acceptance",
     "No automatic bulk correction and no production writes",
     "No historical availability backdating; frozen old experiments unchanged",
     "v3 rule output is not universal semantic certification, independent matched-pair coverage or FDR approval",
