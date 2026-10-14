@@ -210,6 +210,14 @@ RETURNING {_FACT_COLUMNS}""",
     return dict(row), True
 
 
+async def get_fact(conn: AsyncConnection, fact_id: UUID) -> dict[str, Any] | None:
+    """Read an immutable fact version for a trusted prospective review."""
+    async with conn.cursor(row_factory=dict_row) as cur:
+        await cur.execute(f"SELECT {_FACT_COLUMNS} FROM market_event_facts WHERE fact_id=%s", (fact_id,))
+        row = await cur.fetchone()
+    return dict(row) if row is not None else None
+
+
 async def create_snapshot(
     conn: AsyncConnection,
     request: EventSnapshotRequest,

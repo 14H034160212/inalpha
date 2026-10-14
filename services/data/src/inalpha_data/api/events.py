@@ -138,6 +138,19 @@ async def list_visible_event_facts(
     )
 
 
+@router.get("/facts/{fact_id}", response_model=EventFactRecord)
+async def get_reviewable_event_fact(
+    fact_id: UUID,
+    db: DBConn,
+    _identity: Annotated[DataServiceIdentity, Depends(require_event_extract)],
+) -> EventFactRecord:
+    """Read an exact immutable version only inside the extraction review boundary."""
+    row = await store.get_fact(db, fact_id)
+    if row is None:
+        raise EventRecordNotFoundError("source fact not found")
+    return EventFactRecord(**row)
+
+
 @router.get("/raw/{event_id}", response_model=RawEventRecord)
 async def get_raw_event(
     event_id: UUID,

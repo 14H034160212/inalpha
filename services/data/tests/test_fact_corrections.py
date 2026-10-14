@@ -498,6 +498,8 @@ def test_correction_route_requires_existing_extraction_authority(monkeypatch, mo
         corrected,
         True,
     )
+    read = AsyncMock(return_value=corrected)
+    monkeypatch.setattr(events.store, "get_fact", read)
     # Exercise the real dependency without opening a database or widening owner rights.
     with TestClient(app, raise_server_exceptions=False) as client:
         response = client.post(
@@ -505,11 +507,17 @@ def test_correction_route_requires_existing_extraction_authority(monkeypatch, mo
             json=review(source).model_dump(mode="json"),
             headers=headers,
         )
+        exact_read = client.get(f"/api/v1/events/facts/{corrected_id}", headers=headers)
     if mode == "service":
         assert response.status_code == 200
+        assert exact_read.status_code == 200
+        assert exact_read.json()["fact_id"] == str(corrected_id)
+        read.assert_awaited_once()
         assert response.json()["fact"]["fact_id"] == str(corrected_id)
         mutation.assert_awaited_once()
         assert mutation.await_args.kwargs["service_subject"] == "service:test"
     else:
         assert response.status_code == 401
+        assert exact_read.status_code == 401
+        read.assert_not_awaited()
         mutation.assert_not_awaited()
