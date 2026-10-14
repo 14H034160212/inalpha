@@ -10,7 +10,9 @@ Inalpha 是 AI agent 编排与多 Python kernel 的量化实验框架。D-12 因
 下单必须经过 `trade.create_plan → trade.approve_plan → trade.execute_plan` 与机器风控。演化研究不会自动 promote、启动 Runner 或下单。
 架构与模块职责见 [架构总图](01-architecture-overview.md) / [内核设计](03-kernel-design.md)。
 
-最新质量守卫发布（2026-10-13）：[PR #236](https://github.com/mirror29/inalpha/pull/236) 已合并，Dashboard / Mastra / Evolver 固定 `76727f6d`，独立 SSH 核对镜像与 healthy；其余七容器未变，schema0068不迁移。精确 head / main CI 与七镜像成功、tree一致。两次连接守卫拒绝均未替换服务，随后四轮空闲检查通过；配置/DB备份600、部署脚本TOC可读，不等于恢复演练。最新自动CR有3项MEDIUM，按实际调用链与子交付边界回应，独立静态增量复核无确认新增阻断，不能称零发现。独立复查公开登录最终200；Mastra与Evolver的容器内准备接口未登录401，不代表公开准备API路径验收；备份600/TOC可读、DB0068/Loop0/campaign0。Chrome刷新与导航后内容空白，后续焦点切至其他项目；曾短暂SSH超时已恢复，正常owner界面结果未可靠读取，原因未确定；不因这个现象重复部署。见 [质量守卫部署回执](validation/e2-event-quality-deployment-2026-10-13.json)。
+最新事件审核发布（2026-10-14）：[PR #238](https://github.com/mirror29/inalpha/pull/238)已合并，仅Data/Research固定`9fdb8b8a` healthy，schema0069，其余八容器ID未变。精确head/main CI、七镜像成功，评审与合并tree相同。最终自动CR先因GitHub GraphQL500未评审，重跑仍无有效正文，不能算自动CR通过；此前具体发现已修复/回应，专项增量复核无确认新增阻断。五轮空闲检查通过，配置/DB备份600、TOC可读，未做恢复演练。独立SSH复查DBinalpha/0069、审计0、375v2与35v3版本、Loop/campaign0，新接口未登录401，公共登录200。真实原文在部署Research helper经正常Data服务鉴权预览为监管→监管、未写入；不是认证Research入站HTTP或owner审批验收，不能一概撤回含bank原文。见 [生产回执](validation/event-fact-review-deployment-2026-10-14.json)。
+
+此前质量守卫发布（2026-10-13）：[PR #236](https://github.com/mirror29/inalpha/pull/236) 已合并，Dashboard / Mastra / Evolver 固定 `76727f6d`，独立 SSH 核对镜像与 healthy；其余七容器未变，schema0068不迁移。精确 head / main CI 与七镜像成功、tree一致。两次连接守卫拒绝均未替换服务，随后四轮空闲检查通过；配置/DB备份600、部署脚本TOC可读，不等于恢复演练。最新自动CR有3项MEDIUM，按实际调用链与子交付边界回应，独立静态增量复核无确认新增阻断，不能称零发现。独立复查公开登录最终200；Mastra与Evolver的容器内准备接口未登录401，不代表公开准备API路径验收；备份600/TOC可读、DB0068/Loop0/campaign0。Chrome刷新与导航后内容空白，后续焦点切至其他项目；曾短暂SSH超时已恢复，正常owner界面结果未可靠读取，原因未确定；不因这个现象重复部署。见 [质量守卫部署回执](validation/e2-event-quality-deployment-2026-10-13.json)。
 
 此前覆盖矩阵发布（2026-10-13）：PR #231 已合并，Dashboard 与 Mastra 固定部署 `3c8aa389`，均 healthy；其余八容器未变，Evolver 保持 `655e2179`，schema `0068`。精确评审 head 与合并版本差异为空，main CI / 镜像构建成功。四次任务与连接检查均为0，配置/数据库备份权限600，归档目录可读；未进行完整恢复演练。自动 CR 的两项 MEDIUM 已按实际 Paper limit 源码和用户指定三资产范围逐项复核，不能称自动 CR 零发现。见 [生产覆盖与部署回执](validation/e2-coverage-matrix-production-2026-10-13.json)。
 
@@ -18,7 +20,7 @@ Inalpha 是 AI agent 编排与多 Python kernel 的量化实验框架。D-12 因
 
 此前 PR #229 仅 Evolver 发布与响应 checkpoint 边界见 [部署回执](validation/e2-proposal-response-deployment-2026-10-13.json)；PR #223 的旧 Dashboard `12ac65d5` 已被上述发布替换。不能因文档 SHA 变化重建服务。
 
-最新数据质量修复（2026-10-13）：[PR #233](https://github.com/mirror29/inalpha/pull/233) 已合并，仅 Research 固定部署 `4441cb07`，抽取器v3、健康HTTP200，其余九容器未变，schema0068不迁移。修复ban误命中bank等词，并保留中英混排、规则优先级与PIT。235项非联网测试通过（3数据库跳过、4联网排除），29项抽取测试独立通过；最新自动CR无有效正文，独立专项复核无新增阻断，不记为自动CR通过。即时部署回执仍为375条v2；后续只读已观察到5条真实v3，未回填历史。见 [部署回执](validation/event-extractor-ban-deployment-2026-10-13.json)。
+此前数据质量修复（2026-10-13）：[PR #233](https://github.com/mirror29/inalpha/pull/233) 已合并，仅 Research 固定部署 `4441cb07`，抽取器v3、健康HTTP200，其余九容器未变，schema0068不迁移。修复ban误命中bank等词，并保留中英混排、规则优先级与PIT。235项非联网测试通过（3数据库跳过、4联网排除），29项抽取测试独立通过；最新自动CR无有效正文，独立专项复核无新增阻断，不记为自动CR通过。即时部署回执仍为375条v2；后续只读已观察到5条真实v3，未回填历史。见 [部署回执](validation/event-extractor-ban-deployment-2026-10-13.json)。
 
 ## 已验证到哪里
 
@@ -73,9 +75,9 @@ PR #219（业务 `ab5fd15b`）的本地测试边界：Evolver 335 通过 / 1 跳
 
 2026-10-13 正常 owner 后续读取：SOL 建议窗口 10/1T14 至 10/13T01 UTC，165/55/55 bars，选择段 10/8T12 至 10/10T18，3事实、独立上界2/8，未展示审批；后续截止时间已显示02时，上界仍2。日期控件操作未可靠生效，不能新增“参数失效验收通过”结论；Chrome截图与AX内容不一致，内置标签连接20秒超时。未提交模型请求。见 [后续读取边界](validation/e2-owner-preflight-followup-2026-10-13.json)。
 
-历史事实纠正基础接口已在本地实现（`e8365aa9`，尚未合并或部署）：普通 owner 无写权限，沿用可信抽取服务身份；跨分类原子撤回旧规范键并追加替代事实，纠正可见时间由数据库当前时钟生成，审计绑定原事实摘要、操作和服务身份。33项新隔离库回归通过，Data非集成回归通过；实际有审计记录的降级被拒绝；两项并发/降级审查发现已修复，增量静态复核无新增确认阻断。此处是数据库与路由测试，不是完整服务或生产纠正验收；Research 正常审核调用入口现已补齐代码和自动化，历史事实逐项审核和生产实测仍待完成，不自动批量改写。已拆分本地代码/文档提交；10月14日基础分支已成功推送，尚未合并或部署。见 [本地纠正回执](validation/event-fact-corrections-local-2026-10-13.json)。
+历史事实纠正基础接口已实现（原本地`e8365aa9`，现已随PR #238合并部署）：普通 owner 无写权限，沿用可信抽取服务身份；跨分类原子撤回旧规范键并追加替代事实，纠正可见时间由数据库当前时钟生成，审计绑定原事实摘要、操作和服务身份。33项新隔离库回归通过，Data非集成回归通过；实际有审计记录的降级被拒绝；两项并发/降级审查发现已修复，增量静态复核无新增确认阻断。此处是数据库与路由测试，不是完整服务或生产纠正验收；Research 正常审核调用入口现已补齐代码和自动化，历史事实逐项审核和生产实测仍待完成，不自动批量改写。已拆分本地代码/文档提交；10月14日已合并并仅部署Data/Research；生产历史纠正写入仍未验收。见 [本地纠正回执](validation/event-fact-corrections-local-2026-10-13.json)。
 
-2026-10-14 已补可信 Research 审核调用（`b7a247b1`）：默认只预览，执行绑定并重算审核摘要，沿用现有服务用途鉴权；不向普通 owner 开放全局事实写权限。完整解析关联审计/事实回执，未知响应不自动重发。相关52项、Research非集成257通过/3数据库跳过/4联网排除，最新Data新隔离库40通过，优化模式另40通过；后续完整本地Data/Research进程经真实HTTP验证：预览0写、执行1审计/3事实版本，Research重启后同请求返回同一事实、owner拒绝。使用临时探索脚本与合成服务授权，不等于同镜像或生产纠正验收。[PR #238](https://github.com/mirror29/inalpha/pull/238)已创建；新增原文版本在抽取前也阻止重新确认旧原文，只允许显式撤回旧分类。旧head自动CR3项MEDIUM已按实际规范化/固定服务身份逐项核对，内部校验错误已修为脱敏500，冲突409与多资产回归补齐；最终追加专用源缺失异常与显式审计事务检查，防止KeyError误报404和优化模式跳过保护；40项普通/40项优化回归通过。自动审查各head的发现已保留，不记为最终head审查通过。下一步核对精确head CI与审查，只部署Data/Research，再逐项审核历史事实；不自动解除旧快照阻塞或运行付费搜索。见 [可信审核本地回执](validation/event-fact-review-local-2026-10-14.json)。
+2026-10-14 已补可信 Research 审核调用（`b7a247b1`）：默认只预览，执行绑定并重算审核摘要，沿用现有服务用途鉴权；不向普通 owner 开放全局事实写权限。完整解析关联审计/事实回执，未知响应不自动重发。相关52项、Research非集成257通过/3数据库跳过/4联网排除，最新Data新隔离库40通过，优化模式另40通过；后续完整本地Data/Research进程经真实HTTP验证：预览0写、执行1审计/3事实版本，Research重启后同请求返回同一事实、owner拒绝。使用临时探索脚本与合成服务授权，不等于同镜像或生产纠正验收。[PR #238](https://github.com/mirror29/inalpha/pull/238)已创建；新增原文版本在抽取前也阻止重新确认旧原文，只允许显式撤回旧分类。旧head自动CR3项MEDIUM已按实际规范化/固定服务身份逐项核对，内部校验错误已修为脱敏500，冲突409与多资产回归补齐；最终追加专用源缺失异常与显式审计事务检查，防止KeyError误报404和优化模式跳过保护；40项普通/40项优化回归通过。自动审查各head的发现已保留，不记为最终head审查通过。精确head/main CI、审查证据核对及Data/Research部署已完成；下一步逐项审核历史事实并验证正常服务申请/写入/恢复；不自动解除旧快照阻塞或运行付费搜索。见 [可信审核本地回执](validation/event-fact-review-local-2026-10-14.json)。
 
 ### P0 · 可靠性与真实五代搜索
 
