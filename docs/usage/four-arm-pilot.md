@@ -129,10 +129,21 @@ rather than a separately budgeted arm) with a paired B-mean minus B interval, an
 pairwise sample action disagreement.
 
 The report includes multiclass Brier, hit/coverage/invalid rates, net excess returns,
-intention-to-treat uniform probabilities for invalid runs, complete-case results,
-paired moving-block bootstrap intervals, usage, intervention flip/probability/Brier changes
-and noise-adjusted flip differences. Character matching is not exact tokenizer matching;
-formal intervention controls and blinded human process scoring still need protocol review.
+intention-to-treat scoring with the strict invalid-run rule (Brier 2.0, action 0) as the
+primary analysis, uniform and climatology fallbacks as sensitivity analyses only,
+complete-case results, paired moving-block bootstrap intervals, usage, intervention
+flip/probability/Brier changes and noise-adjusted flip differences. Character matching is
+not exact tokenizer matching; formal intervention controls and blinded human process
+scoring still need protocol review.
+
+Not yet covered by the report (tracked on #206, not part of this development change):
+
+- Budget dispersion (#206 review §2b): per-case input-plus-output usage, its IQR per arm,
+  and each case's ratio to an agreed budget target. The report currently checks only
+  per-arm medians (`compute_match_within_10_percent`).
+- Formal intervention selection (#206 review §3d): a preregistered selection rule in place
+  of the first N cases, and per-intervention eligible/attempted/completed/skipped counts with
+  explicit skip-rate denominators. The runner currently retains individual skip reasons only.
 
 A 10-case run validates the machinery. Retain negative/inconclusive results and limitations.
 
