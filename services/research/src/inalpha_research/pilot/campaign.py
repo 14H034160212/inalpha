@@ -15,6 +15,7 @@ from inalpha_shared.usage import PostgresUsageStore
 from .artifacts import PilotArtifacts, digest, safe_json, validate_bundle, validate_run
 from .budget import budget_diagnostics
 from .experiment import DEFAULT_TEMPERATURE, AttemptRunner, CampaignBudget, recorder_for, run_arm
+from .interventions import select_cases
 from .materials import write_private
 from .report import build_report, intervention_plans
 from .rescore import arm_tokens
@@ -97,7 +98,15 @@ async def campaign(
     for case in cases:
         for arm in "ABCD":
             runs.append(await execute(case, arm))
-    for case in cases[:intervention_cases]:
+    rule = configuration.get("intervention_selection") or {}
+    selection = select_cases(
+        runs,
+        [c["case_id"] for c in cases],
+        rule=rule.get("rule", "first_n"),
+        size=int(rule.get("size", intervention_cases)),
+        seed=rule.get("seed"),
+    )
+    for case in (c for c in cases if c["case_id"] in selection["selected"]):
         base = next(r for r in runs if r["case_id"] == case["case_id"] and r["arm"] == "D")
         for plan in intervention_plans(base, case):
             if "skip" in plan:
@@ -123,6 +132,7 @@ async def campaign(
     result = {
         "runs": runs,
         "replays": replays,
+        "intervention_selection": selection,
         "estimated_cost_or_reserved_usd": str(budget.spent),
         "stopped_on_unknown_or_accounting": budget.stopped,
         "inputs_hash": digest(inputs),
@@ -159,6 +169,7 @@ def main() -> None:
             outcomes,
             result["replays"],
             climatology=protocol.get("climatology"),
+            selection=result.get("intervention_selection"),
         )
         declared = configuration.get("matching_target_tokens")
         output["budget_diagnostics"] = budget_diagnostics(
