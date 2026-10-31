@@ -8,14 +8,15 @@ from __future__ import annotations
 
 import statistics
 from collections import Counter
+from fractions import Fraction
 from typing import Any
 
 # BudgetStop reasons raised by the runner. Token stops are budget boundaries; accounting
 # stops come from unconfirmed ledger settlement or unknown usage and are kept distinct.
 TOKEN_STOPS = frozenset({"TOKEN_BUDGET_OR_UNKNOWN_USAGE", "CAMPAIGN_BUDGET"})
 ACCOUNTING_STOPS = frozenset({"RESERVATION_EXCEEDED", "LEDGER_UNCONFIRMED", "UNKNOWN_USAGE"})
-MEDIAN_TOLERANCE = 0.10
-CASE_TOLERANCE = 0.25
+MEDIAN_TOLERANCE = Fraction(1, 10)
+CASE_TOLERANCE = Fraction(1, 4)
 CASE_SHARE = 0.80
 
 
@@ -59,6 +60,12 @@ def spread(values: list[float]) -> dict[str, float | None]:
     }
 
 
+def within(tokens: float, target: int, tolerance: Fraction) -> bool:
+    """Inclusive |tokens - target| <= tolerance * target in exact arithmetic, so a
+    boundary such as 1,100 against 1,000 at ±10% is never lost to float rounding."""
+    return abs(Fraction(tokens) - target) <= tolerance * target
+
+
 def budget_diagnostics(
     runs: list[dict[str, Any]],
     *,
@@ -90,13 +97,15 @@ def budget_diagnostics(
                     "ratio_to_cap": row["known_tokens"] / cap if cap else None,
                 }
             )
-        ratios = [c["ratio_to_target"] for c in cases if c["ratio_to_target"] is not None]
         median = statistics.median(tokens) if tokens else None
+        known = [row["known_tokens"] for row in clean]
         within_case = (
-            sum(abs(r - 1) <= CASE_TOLERANCE for r in ratios) / len(ratios) if ratios else None
+            sum(within(t, target, CASE_TOLERANCE) for t in known) / len(known)
+            if target and known
+            else None
         )
         median_ok = (
-            abs(median / target - 1) <= MEDIAN_TOLERANCE if target and median is not None else None
+            within(median, target, MEDIAN_TOLERANCE) if target and median is not None else None
         )
         reasons = Counter(row["reason"] for row in rows if row["reason"])
         report[arm] = {

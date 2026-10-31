@@ -58,6 +58,23 @@ def test_budget_target_is_separate_from_cap_and_unknown_usage_is_excluded():
     assert c4["known_tokens"] == 8000 and c4["ratio_to_target"] is None
 
 
+@pytest.mark.parametrize(
+    ("tokens", "achieved"),
+    [(1100, True), (900, True), (1101, False), (899, False)],
+)
+def test_median_boundary_is_inclusive_and_exact(tokens, achieved):
+    runs = [run(f"c{i}", "B", [call(tokens)]) for i in range(5)]
+    b = budget_diagnostics(runs, caps={}, targets={"B": 1000})["arms"]["B"]
+    assert b["share_cases_within_25_percent"] == 1.0
+    assert b["matching_achieved"] is achieved
+
+
+@pytest.mark.parametrize(("tokens", "inside"), [(1250, 1.0), (750, 1.0), (1251, 0.0), (749, 0.0)])
+def test_case_boundary_is_inclusive_and_exact(tokens, inside):
+    b = budget_diagnostics([run("c1", "B", [call(tokens)])], caps={}, targets={"B": 1000})
+    assert b["arms"]["B"]["share_cases_within_25_percent"] == inside
+
+
 def test_budget_without_declared_target_omits_ratios_and_verdict():
     report = budget_diagnostics([run("c1", "A", [call(600)])], caps={"A": 4000}, targets={})
     a = report["arms"]["A"]
