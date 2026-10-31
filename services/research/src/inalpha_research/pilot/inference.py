@@ -86,7 +86,9 @@ def date_bootstrap(
     difference over all ticker-dates drawn. p-values test zero by centring the bootstrap
     distribution on the estimate: p = (1 + #|d* - d| >= |d|) / (1 + R)."""
     dates = sorted({row["date"] for row in scores})
-    if len(dates) < block:
+    if len(dates) <= block:
+        # At equality the only block is the full sequence: every resample reproduces the
+        # estimate, which would report certainty from a single possible draw.
         return {"block_length": block, "reason": "TOO_FEW_DATES", "contrasts": None}
     names = [f"{x}-{y}" for x, y in CONTRASTS]
     sums: dict[str, defaultdict[str, float]] = {name: defaultdict(float) for name in names}
@@ -161,15 +163,21 @@ def formal_inference(
 
 def claims(primary: dict[str, Any], confirmatory: dict[str, Any]) -> dict[str, Any]:
     """A contrast is claimed only when the retrospective test rejects after Holm and the
-    forward period estimates the same direction."""
+    forward period estimates the same nonzero direction; zero in either period is no
+    direction."""
     out = {}
     for name, test in (primary["primary"]["contrasts"] or {}).items():
         forward = (confirmatory["primary"]["contrasts"] or {}).get(name)
-        same = forward is not None and (test["difference"] < 0) == (forward["difference"] < 0)
+        sign = (test["difference"] > 0) - (test["difference"] < 0)
+        same = (
+            forward is not None
+            and sign != 0
+            and sign == (forward["difference"] > 0) - (forward["difference"] < 0)
+        )
         out[name] = {
             "retrospective_reject": test["reject"],
             "same_direction_forward": same,
             "claim": bool(test["reject"] and same),
-            "favours": "D" if test["difference"] < 0 else name.split("-")[1],
+            "favours": None if sign == 0 else "D" if sign < 0 else name.split("-")[1],
         }
     return out

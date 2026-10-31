@@ -212,3 +212,34 @@ def test_formal_inference_reports_sensitivity_and_claims_need_forward_agreement(
     assert verdict["D-A"]["retrospective_reject"]
     assert not verdict["D-A"]["same_direction_forward"] and not verdict["D-A"]["claim"]
     assert claims(result, result)["D-A"]["claim"]
+
+
+def test_bootstrap_needs_an_alternative_block():
+    # Four dates, block 4: the only block is the whole sequence, so no interval exists.
+    runs, labels = panel(dates=4)
+    for r, d in zip(
+        [r for r in runs if r["arm"] == "D" and r["case_id"].startswith("AAA")],
+        [-1, 1, -1, 0.9],
+        strict=True,
+    ):
+        r["decision"]["p_up"] = 0.5 - d / 2
+    scores = case_scores(runs, labels, CLIM)
+    assert date_bootstrap(scores, block=4, resamples=200)["reason"] == "TOO_FEW_DATES"
+    assert date_bootstrap(scores, block=2, resamples=200)["contrasts"] is not None
+    runs, labels = panel(dates=8)
+    result = formal_inference(runs, labels, CLIM, resamples=200)
+    assert result["primary"]["contrasts"] is not None
+    assert [s.get("reason") for s in result["sensitivity"]] == [None, "TOO_FEW_DATES"]
+
+
+def contrast(difference, reject=True):
+    return {"primary": {"contrasts": {"D-A": {"difference": difference, "reject": reject}}}}
+
+
+def test_zero_difference_has_no_direction_in_either_period():
+    assert claims(contrast(0.3), contrast(0.1))["D-A"]["claim"]
+    assert claims(contrast(-0.3), contrast(-0.1))["D-A"]["favours"] == "D"
+    for retro, forward in [(0.3, 0.0), (-0.3, 0.0), (0.0, 0.2), (0.0, -0.2), (0.0, 0.0)]:
+        verdict = claims(contrast(retro), contrast(forward))["D-A"]
+        assert not verdict["same_direction_forward"] and not verdict["claim"]
+    assert claims(contrast(0.0), contrast(0.0))["D-A"]["favours"] is None

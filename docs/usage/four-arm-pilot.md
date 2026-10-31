@@ -175,9 +175,12 @@ packet has been built with them yet.
   - two-sided p-values from the centred bootstrap distribution, Holm-adjusted across the
     three contrasts at α = 0.05.
 
-  A missing run for any arm is an error, never a silent drop.
+  A missing run for any arm is an error, never a silent drop. A block length that is not
+  shorter than the number of decision dates returns `TOO_FEW_DATES` instead of an interval,
+  because the only possible block would reproduce the estimate in every resample.
 - `pilot.inference.claims` claims a contrast only when the retrospective test rejects
-  after Holm and the forward period estimates the same direction.
+  after Holm and the forward period estimates the same nonzero direction; a zero difference
+  in either period has no direction and is never claimed.
 
 ## Real-provider development acceptance (2026-10-12)
 
