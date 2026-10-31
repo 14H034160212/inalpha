@@ -180,6 +180,9 @@ configuration and recorded in `results.json`:
   validity. A shortfall is reported, never filled from invalid runs or other arms.
 - Without it, the development behaviour is unchanged: the first `--intervention-cases`
   cases in input order (`first_n`).
+- The rule, size and seed are validated before the campaign directory is created or any
+  provider call is made; an invalid configuration costs nothing. Only the valid-D draw waits
+  for the base runs.
 
 Every report carries `intervention_accounting`: the selection rule, seed, full pool, valid-D
 pool and shortfall, then, per intervention, selected / skipped (with reasons) / attempted /

@@ -134,3 +134,34 @@ async def test_campaign_records_seeded_selection_and_report_accounting(tmp_path)
         accounting_report["interventions"]["delete_contribution"]["valid_intervention_noise_pairs"]
         == 2
     )
+
+
+@pytest.mark.parametrize(
+    "selection",
+    [
+        {"rule": "seeded_random", "size": 2},
+        {"rule": "seeded_random", "size": 2, "seed": "206"},
+        {"rule": "best_cases", "size": 2},
+        {"rule": "first_n", "size": -1},
+        {"rule": "first_n", "size": 1.5},
+    ],
+)
+async def test_invalid_selection_fails_before_any_provider_call(tmp_path, selection):
+    data = materials()
+    calls = []
+
+    async def invoke(**kwargs):
+        calls.append(kwargs)
+        return response(decision([json.loads(kwargs["user"])["evidence"][0]["id"]]))
+
+    with pytest.raises(ValueError, match=r"intervention|seed"):
+        await campaign(
+            {"protocol": data["protocol"], "cases": data["development"][:2]},
+            tmp_path / "campaign",
+            {**CONFIG, "intervention_selection": selection},
+            Store(),
+            "test:owner",
+            invoke,
+        )
+    assert calls == []
+    assert not (tmp_path / "campaign").exists()

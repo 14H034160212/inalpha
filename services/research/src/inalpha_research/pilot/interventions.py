@@ -29,6 +29,20 @@ NOISE_FOR = {
 RULES = ("first_n", "seeded_random")
 
 
+def selection_rule(configuration: dict[str, Any] | None, default_size: int = 1) -> dict[str, Any]:
+    """Validate a selection configuration; campaigns call this before any provider call."""
+    configuration = configuration or {}
+    rule = configuration.get("rule", "first_n")
+    size, seed = configuration.get("size", default_size), configuration.get("seed")
+    if rule not in RULES:
+        raise ValueError("unknown intervention selection rule")
+    if isinstance(size, bool) or not isinstance(size, int) or size < 0:
+        raise ValueError("intervention size must be a non-negative integer")
+    if rule == "seeded_random" and (isinstance(seed, bool) or not isinstance(seed, int)):
+        raise ValueError("seeded_random selection requires a preregistered integer seed")
+    return {"rule": rule, "size": size, "seed": seed}
+
+
 def select_cases(
     runs: list[dict[str, Any]],
     case_ids: list[str],
@@ -43,17 +57,12 @@ def select_cases(
     not). ``seeded_random`` draws min(size, valid pool) cases from cases whose D base run
     completed, using a preregistered seed; a shortfall is reported, not filled.
     """
-    if rule not in RULES:
-        raise ValueError("unknown intervention selection rule")
-    if size < 0:
-        raise ValueError("intervention size must be non-negative")
+    selection_rule({"rule": rule, "size": size, "seed": seed})
     status = {r["case_id"]: r["status"] for r in runs if r["arm"] == "D"}
     valid = [case for case in case_ids if status.get(case) == "completed"]
     if rule == "first_n":
         selected = case_ids[:size]
     else:
-        if seed is None:
-            raise ValueError("seeded_random selection requires a preregistered seed")
         chosen = set(random.Random(seed).sample(valid, min(size, len(valid))))
         selected = [case for case in case_ids if case in chosen]
     return {

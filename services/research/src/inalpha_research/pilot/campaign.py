@@ -15,7 +15,7 @@ from inalpha_shared.usage import PostgresUsageStore
 from .artifacts import PilotArtifacts, digest, safe_json, validate_bundle, validate_run
 from .budget import budget_diagnostics
 from .experiment import DEFAULT_TEMPERATURE, AttemptRunner, CampaignBudget, recorder_for, run_arm
-from .interventions import select_cases
+from .interventions import select_cases, selection_rule
 from .materials import write_private
 from .report import build_report, intervention_plans
 from .rescore import arm_tokens
@@ -33,6 +33,9 @@ async def campaign(
 ) -> dict[str, Any]:
     """Run sequentially with shared spend reservations and no automatic paid resume."""
     configuration = {**configuration, "tau": inputs["protocol"]["tau"]}
+    # Fail on a bad selection rule before any directory, reservation or provider call; the
+    # valid-D draw itself still happens after the base runs.
+    rule = selection_rule(configuration.get("intervention_selection"), intervention_cases)
     cases = inputs["cases"]
     if not cases or len({c["case_id"] for c in cases}) != len(cases):
         raise ValueError("unique nonempty development cases required")
@@ -98,14 +101,7 @@ async def campaign(
     for case in cases:
         for arm in "ABCD":
             runs.append(await execute(case, arm))
-    rule = configuration.get("intervention_selection") or {}
-    selection = select_cases(
-        runs,
-        [c["case_id"] for c in cases],
-        rule=rule.get("rule", "first_n"),
-        size=int(rule.get("size", intervention_cases)),
-        seed=rule.get("seed"),
-    )
+    selection = select_cases(runs, [c["case_id"] for c in cases], **rule)
     for case in (c for c in cases if c["case_id"] in selection["selected"]):
         base = next(r for r in runs if r["case_id"] == case["case_id"] and r["arm"] == "D")
         for plan in intervention_plans(base, case):
